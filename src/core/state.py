@@ -38,3 +38,4 @@ class AgentState(TypedDict):
     final_audit_report: str
     
     current_status: str
+    
