@@ -1,13 +1,13 @@
 [project]
 name = "forensic-swarm-auditor"
 version = "0.1.0"
-description = "Multi-agent autonomous repository evaluation engine"
+description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.14"
 dependencies = [
-    "langgraph",
-    "langchain-openai",
-    "pydantic>=2.0",
-    "python-dotenv",
-    "gitpython",  # We will need this to clone repos
+    "gitpython>=3.1.46",
+    "langchain-openai>=1.1.10",
+    "langgraph>=1.0.9",
+    "pydantic>=2.12.5",
+    "python-dotenv>=1.2.1",
 ]
