@@ -4,3 +4,10 @@
 
 # LangGraph
 .langgraph_api/
+
+.env
+__pycache__/
+.venv/
+.pytest_cache/
+data/input/*
+!data/input/.gitkeep
