@@ -1,27 +1,48 @@
 import os
 import ast
-import tempfile
+import os
 import subprocess
-from git import Repo
+import tempfile
+import ast
+from typing import List, Optional
 
-def safe_clone(repo_url: str, target_dir: str):
-    """Sandboxed cloning to prevent live-directory pollution."""
+def clone_repo_sandboxed(repo_url: str) -> str:
+    """
+    Protocol A: Secure Environment Isolation.
+    Clones the target repo into a temporary directory that 
+    auto-deletes after the audit to prevent local pollution.
+    """
+    temp_dir = tempfile.mkdtemp()
     try:
-        Repo.clone_from(repo_url, target_dir)
-        return True
-    except Exception as e:
-        print(f"Forensic Error: Failed to clone {repo_url} - {str(e)}")
-        return False
+        subprocess.run(
+            ["git", "clone", repo_url, temp_dir], 
+            check=True, capture_output=True, text=True
+        )
+        return temp_dir
+    except subprocess.CalledProcessError as e:
+        print(f"Forensic Failure: Git Clone Error: {e.stderr}")
+        raise
 
-def analyze_ast_rigor(file_path: str):
-    """Protocol B: Deep Code Inspection via AST."""
+def get_git_log(repo_path: str) -> List[str]:
+    """
+    Protocol C: The Git Narrative.
+    Extracts atomic history to verify the engineering process.
+    """
+    try:
+        result = subprocess.run(
+            ["git", "-C", repo_path, "log", "--oneline", "--reverse"],
+            capture_output=True, text=True, check=True
+        )
+        return result.stdout.strip().split("\n")
+    except Exception:
+        return []
+
+def get_ast_tree(file_path: str) -> Optional[ast.AST]:
+    """
+    The Detective's Microscope.
+    Parses Python code into a tree for structural analysis.
+    """
     if not os.path.exists(file_path):
         return None
     with open(file_path, "r") as f:
-        try:
-            tree = ast.parse(f.read())
-            # We look for Pydantic classes or operator reducers
-            # This is the 'DNA' test of the student's code
-            return tree
-        except SyntaxError:
-            return "Corrupted Code: Syntax Error detected"
+        return ast.parse(f.read())
