@@ -1,13 +1,11 @@
-# Forensic Swarm Auditor 
+# 🏛️ Automaton Auditor: Digital Courtroom
 
-An advanced AI orchestration system designed to evaluate software repositories through a multi-layered judicial process.
+## Setup
+1. Install `uv`: `pip install uv`
+2. Sync dependencies: `uv sync`
+3. Setup environment: Create `.env` with `GOOGLE_API_KEY`
 
-##  Architecture
-- **Forensic Layer:** AST-based code analysis and document verification.
-- **Judicial Layer:** Dialectical reasoning using Prosecutor, Defense, and Tech-Lead personas.
-- **Executive Layer:** Conflict resolution and final synthesis of the Audit Report.
-
-##  Tech Stack
-- **Orchestration:** LangGraph
-- **LLMs:** OpenAI GPT-4o / Gemini 1.5 Pro
-- **Environment:** uv
+## Usage
+To run the Forensic Detectives against a target repository:
+```bash
+python main.py --repo [https://github.com/user/target-repo](https://github.com/user/target-repo) --pdf reports/target.pdf
