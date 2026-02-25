@@ -13,32 +13,87 @@ The **Forensic Swarm Auditor** is an advanced autonomous system designed to eval
 
 ## 📂 Project Structure
 ```text
+# 🏛️ Forensic Swarm Auditor
+> **Neuro-Symbolic Multi-Agent Judicial System for High-Integrity Code Auditing**
+
+[![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-blue.svg)](https://www.python.org/)
+[![Managed by uv](https://img.shields.io/badge/managed%20by-uv-arc.svg)](https://github.com/astral-sh/uv)
+[![Orchestrated by LangGraph](https://img.shields.io/badge/orchestrated%20by-LangGraph-orange.svg)](https://langchain-ai.github.io/langgraph/)
+[![Tracing](https://img.shields.io/badge/tracing-LangSmith-green.svg)](https://smith.langchain.com/)
+
+## 📖 Overview
+The **Forensic Swarm Auditor** is an advanced autonomous system designed to evaluate software repositories against complex PDF-based rubrics. By integrating **Structural AST Analysis** (Symbolic logic) with an **Adversarial Judicial Layer** (Neuro reasoning), the system provides verifiable, explainable audits that eliminate the subjectivity common in standard LLM code reviews.
+
+
+
+## 📂 Project Structure (The Three-Layer Swarm)
+Following the modular layout at `src/agents/`:
+
+```text
+# 🏛️ Forensic Swarm Auditor
+> **Neuro-Symbolic Multi-Agent Judicial System for High-Integrity Code Auditing**
+
+[![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-blue.svg)](https://www.python.org/)
+[![Managed by uv](https://img.shields.io/badge/managed%20by-uv-arc.svg)](https://github.com/astral-sh/uv)
+[![Orchestrated by LangGraph](https://img.shields.io/badge/orchestrated%20by-LangGraph-orange.svg)](https://langchain-ai.github.io/langgraph/)
+[![Tracing](https://img.shields.io/badge/tracing-LangSmith-green.svg)](https://smith.langchain.com/)
+
+## 📖 Overview
+The **Forensic Swarm Auditor** is a production-grade autonomous system designed to evaluate software repositories against complex PDF-based rubrics. By integrating **Structural AST Analysis** (Symbolic logic) with an **Adversarial Judicial Layer** (Neuro reasoning), the system provides verifiable, explainable audits that eliminate the subjectivity common in standard LLM code reviews.
+
+
+
+## 📂 Detailed Project Structure
+Following the modular architecture at `src/`:
+
+```text
+# 🏛️ Forensic Swarm Auditor
+> **Neuro-Symbolic Multi-Agent Judicial System for High-Integrity Code Auditing**
+
+[![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-blue.svg)](https://www.python.org/)
+[![Managed by uv](https://img.shields.io/badge/managed%20by-uv-arc.svg)](https://github.com/astral-sh/uv)
+[![Orchestrated by LangGraph](https://img.shields.io/badge/orchestrated%20by-LangGraph-orange.svg)](https://langchain-ai.github.io/langgraph/)
+[![Tracing](https://img.shields.io/badge/tracing-LangSmith-green.svg)](https://smith.langchain.com/)
+
+## 📖 Overview
+The **Forensic Swarm Auditor** is a production-grade autonomous system designed to evaluate software repositories against complex PDF-based rubrics. By integrating **Structural AST Analysis** (Symbolic logic) with an **Adversarial Judicial Layer** (Neuro reasoning), the system provides verifiable, explainable audits that eliminate the subjectivity common in standard LLM code reviews.
+
+
+
+## 📂 Detailed Project Structure
+Following the modular architecture with dedicated infrastructure and core orchestration:
+
+```text
 forensic-swarm-auditor/
 ├── README.md
 ├── pyproject.toml
 ├── .env.example
-├── main.py                     # Entry point with CLI flags
+├── main.py                     # CLI Entry Point
 ├── src/
-│   ├── engine.py               # LangGraph workflow orchestration
-│   ├── core/
-│   │   ├── config.py           # Pydantic settings & API management
-│   │   └── state.py            # Typed graph state definitions
+│   ├── core/                   # ORCHESTRATION & SPECIFICATIONS
+│   │   ├── engine.py           # LangGraph Workflow & Node Orchestration
+│   │   ├── state.py            # Typed Graph State & Schema Contracts
+│   │   └── config.py           # Pydantic V2 Settings Management
 │   ├── agents/
-│   │   ├── detectives/
-│   │   │   ├── repo.py         # Git forensics & AST structural checks
-│   │   │   └── doc_analyst.py  # Semantic PDF ingestion
-│   │   └── judges/
-│   │       ├── prosecutor.py   # Adversarial non-compliance analysis
-│   │       ├── defense.py      # Contextual intent justification
-│   │       └── chief_justice.py # Final weighted consensus synthesis
+│   │   ├── detectives/         # LAYER 1: DATA & EVIDENCE
+│   │   │   ├── repo.py         # Git Forensics Node
+│   │   │   └── analyst.py      # AST Structural Verification Node
+│   │   ├── judges/             # LAYER 2: ADVERSARIAL TRIAL
+│   │   │   ├── prosecutor.py   # Rubric Violation Analysis Node
+│   │   │   └── defense.py      # Implementation Justification Node
+│   │   └── chief_justice/      # LAYER 3: VERDICT SYNTHESIS
+│   │       └── justice.py      # Final Score & Report Generation Node
+│   ├── infrastructure/         # SYSTEM FOUNDATIONS
+│   │   ├── sandbox.py          # Isolated Environment & Security Logic
+│   │   └── observability.py    # LangSmith Tracing & Metric Exports
+│   ├── tools/                  # REUSABLE AGENT CAPABILITIES
+│   │   ├── repo_tools.py       # Git & AST Forensics Utility
+│   │   └── doc_tools.py        # Semantic PDF/Rubric Ingestion
 │   └── utils/
-│       ├── ast_tools.py        # Concrete structural verification logic
-│       └── pdf_engine.py       # Context-aware chunking utilities
-├── tests/
-│   ├── unit/
-│   └── integration/
+│       ├── formatters.py       # Markdown & PDF Report Export
+│       └── logger.py           # Forensic Trace Logging
 └── .github/
-    └── workflows/              # CI/CD for contract validation
+    └── workflows/              # CI/CD for Contract Validation
 ```
 
 
