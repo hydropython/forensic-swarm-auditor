@@ -1,36 +1,38 @@
+import os
 import shutil
-import subprocess
 import tempfile
-from contextlib import contextmanager
 from pathlib import Path
-from typing import Generator
+from contextlib import contextmanager
 
 class ForensicSandbox:
-    """🛡️ Infrastructure Tier: Manages isolated 'Crime Scenes'."""
-    def __init__(self, repo_url: str):
-        self.repo_url = repo_url
-        self.root_path: Path = None
+    """
+    Manages isolated environments for repository audits.
+    Ensures 'Clean Room' conditions for every forensic run.
+    """
+    
+    def __init__(self, base_path: str = "./temp_audits"):
+        self.base_path = Path(base_path)
+        self.base_path.mkdir(exist_ok=True)
 
     @contextmanager
-    def create_workspace(self) -> Generator[Path, None, None]:
-        tmp_dir = tempfile.mkdtemp(prefix="forensic_audit_")
+    def create_workspace(self, prefix: str = "audit_"):
+        """
+        Context manager to create and automatically cleanup a sandbox.
+        Usage:
+            with sandbox.create_workspace() as workspace_path:
+                # do work here
+        """
+        workspace = Path(tempfile.mkdtemp(dir=self.base_path, prefix=prefix))
         try:
-            self.root_path = Path(tmp_dir)
-            self._clone_repo()
-            yield self.root_path
+            yield workspace
         finally:
-            self._cleanup()
+            self.cleanup(workspace)
 
-    def _clone_repo(self):
-        """Full clone to enable longitudinal git analysis."""
-        try:
-            subprocess.run(
-                ["git", "clone", self.repo_url, str(self.root_path)],
-                check=True, capture_output=True, text=True
-            )
-        except subprocess.CalledProcessError as e:
-            raise RuntimeError(f"Git Clone Failed: {e.stderr}")
+    def cleanup(self, path: Path):
+        """Securely removes the temporary workspace."""
+        if path.exists() and path.is_dir():
+            shutil.rmtree(path)
+            print(f"🧹 Sandbox cleaned: {path}")
 
-    def _cleanup(self):
-        if self.root_path and self.root_path.exists():
-            shutil.rmtree(self.root_path)
+# Global instance for easy access across nodes
+sandbox_manager = ForensicSandbox()
