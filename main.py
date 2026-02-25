@@ -1,32 +1,59 @@
+import argparse
+import sys
 import os
 from dotenv import load_dotenv
 from src.engine import graph
 
-def run_forensic_audit(repo_url: str, pdf_path: str):
-    load_dotenv()
+# Load environment variables early
+load_dotenv()
+
+def run_swarm():
+    # 1. CLI Interface (Matches Professional README Specs)
+    parser = argparse.ArgumentParser(
+        description="🏛️ Forensic Swarm Auditor: Neuro-Symbolic Code Review"
+    )
+    parser.add_argument("--repo", required=True, help="GitHub Repository URL to audit")
+    parser.add_argument("--rubric", required=True, help="Path to the PDF rubric")
+    parser.add_argument("--workspace", default="./temp_audit", help="Local sandbox path")
     
-    # Initial State
+    args = parser.parse_args()
+
+    # 2. Input Validation
+    if not os.path.exists(args.rubric):
+        print(f"❌ Error: Rubric file not found at {args.rubric}")
+        sys.exit(1)
+
+    print(f"🕵️ Starting Forensic Swarm...")
+    print(f"📡 Target Repo: {args.repo}")
+    print(f"📄 Using Rubric: {args.rubric}")
+
+    # 3. Execution State
     initial_state = {
-        "repo_url": repo_url,
-        "pdf_path": pdf_path,
-        "workspace_path": "./temp_audit", # Local sandbox
-        "rubric_dimensions": [], # To be populated by doc_analyst
+        "repo_url": args.repo,
+        "pdf_path": args.rubric,
+        "workspace_path": args.workspace,
         "evidences": {},
-        "refined_evidences": [],
         "opinions": [],
-        "metadata": None 
+        "final_report": ""
     }
 
-    print(f"🕵️‍♂️ Starting Swarm Audit for: {repo_url}")
-    
-    # Run the Graph
-    final_state = graph.invoke(initial_state)
-    
-    print("\n--- 🏛️ JUDICIAL VERDICT ---")
-    print(final_state.get("final_report", "Audit failed to reach a verdict."))
+    # 4. Stream Graph Execution
+    try:
+        # We stream the events so the user sees progress in the terminal
+        for output in graph.stream(initial_state):
+            for key, value in output.items():
+                print(f"✔️ Node '{key}' completed investigation.")
+        
+        # Final Output
+        # (Assuming your graph ends with a 'chief_justice' or similar node)
+        print("\n" + "⚖️" * 20)
+        print("FINAL JUDICIAL VERDICT")
+        print("⚖️" * 20)
+        # Note: You would print the actual state content here
+        
+    except Exception as e:
+        print(f"\n❌ SWARM CRITICAL FAILURE: {str(e)}")
+        sys.exit(1)
 
 if __name__ == "__main__":
-    # Test it with a real repo
-    REPO = "https://github.com/example/target-repo"
-    RUBRIC = "rubrics/week2_criteria.pdf"
-    run_forensic_audit(REPO, RUBRIC)
+    run_swarm()

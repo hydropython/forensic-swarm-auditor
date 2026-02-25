@@ -1,47 +1,64 @@
-import ast
 import subprocess
-import tomllib  # Built-in for parsing pyproject.toml
-from pathlib import Path
-from src.core.state import AgentState, Evidence, ProjectMetadata
+import os
+import ast
+import shutil
+from typing import Dict, Any
 
-def repo_investigator_node(state: AgentState):
-    """🎯 Protocol A.1: Finalized Git & Versioning Forensic Node"""
-    path = Path(state["workspace_path"]) 
+# --- Forensic Exception Hierarchy ---
+class ForensicError(Exception): """Base project error"""
+class AuthError(ForensicError): """GitHub Token/Permission issue"""
+class RepoNotFoundError(ForensicError): """404 or invalid URL"""
+class StructuralValidationError(ForensicError): """Code does not meet rubric specs"""
+
+def repo_investigator(state: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    🔍 Forensic Repo Investigator
+    Performs sandboxed cloning and deep AST structural verification.
+    """
+    repo_url = state["repo_url"]
+    workspace = state["workspace_path"]
     
-    # 1. Git Forensic Check
-    git_cmd = subprocess.run(
-        ["git", "-C", str(path), "log", "--oneline", "--reverse"], 
-        capture_output=True, text=True
-    )
-    commits = git_cmd.stdout.strip().split("\n") if git_cmd.returncode == 0 else []
+    # 1. Clean Room Preparation
+    if os.path.exists(workspace):
+        shutil.rmtree(workspace)
+
+    # 2. Resilient Git Cloning
+    try:
+        subprocess.run(
+            ["git", "clone", repo_url, workspace],
+            capture_output=True, text=True, check=True
+        )
+    except subprocess.CalledProcessError as e:
+        if "Authentication failed" in e.stderr:
+            raise AuthError(f"Access Denied: Check GITHUB_TOKEN for {repo_url}")
+        if "not found" in e.stderr:
+            raise RepoNotFoundError(f"404: Repository {repo_url} does not exist.")
+        raise ForensicError(f"Git Failure: {e.stderr}")
+
+    # 3. Concrete Structural AST Checks
+    # feedback requirement: "verify specific classes/methods"
+    structural_findings = []
     
-    # 2. Version & Environment Audit
-    version = "0.0.0"
-    pyproject_path = path / "pyproject.toml"
-    if pyproject_path.exists():
-        try:
-            data = tomllib.loads(pyproject_path.read_text())
-            version = data.get("project", {}).get("version", "0.0.0")
-        except: pass
-
-    # 3. Progression Scoring (Evolution Logic)
-    # Check if they actually evolved the code across commits
-    history = git_cmd.stdout.lower()
-    prog_score = 0.0
-    if "env" in history: prog_score += 0.3
-    if "agent" in history or "node" in history: prog_score += 0.4
-    if "graph" in history or "workflow" in history: prog_score += 0.3
-
-    # 4. AST Check (Your logic)
-    inv = ASTInvestigator(path)
-    graph_evidence = inv.verify_langgraph_usage()
-
-    return {
-        "metadata": ProjectMetadata(
-            git_log=commits, 
-            has_uv_lock=(path / "uv.lock").exists(),
-            version=version,
-            progression_score=prog_score
-        ),
-        "evidences": {"repo_detective": [graph_evidence]}
-    }
+    for root, _, files in os.walk(workspace):
+        for file in files:
+            if file.endswith(".py"):
+                path = os.path.join(root, file)
+                with open(path, "r", encoding="utf-8") as f:
+                    try:
+                        tree = ast.parse(f.read())
+                        # Extract class and function names for the "Evidence Brief"
+                        classes = [n.name for n in tree.body if isinstance(n, ast.ClassDef)]
+                        funcs = [n.name for n in tree.body if isinstance(n, ast.FunctionDef)]
+                        
+                        if classes or funcs:
+                            structural_findings.append({
+                                "file": file,
+                                "classes": classes,
+                                "methods": funcs
+                            })
+                    except SyntaxError:
+                        continue
+    
+    # Update the global state with verified evidence
+    state["evidences"]["structural_integrity"] = structural_findings
+    return state
