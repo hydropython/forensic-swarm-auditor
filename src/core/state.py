@@ -1,41 +1,54 @@
-from typing import Annotated, List, Literal, TypedDict
-from pydantic import BaseModel, Field
 import operator
+from typing import Annotated, Dict, List, Literal, Optional
+from pydantic import BaseModel, Field
+from typing_extensions import TypedDict
 
-# --- 1. EVIDENCE MODEL ---
-# Detectives must use this to report facts.
+# --- Protocol A: Forensic Evidence (The Fact Record) ---
 class Evidence(BaseModel):
-    category: Literal["Basic", "Essential", "Advanced"]
-    criterion: str
-    finding: str
-    status: Literal["confirmed", "missing", "hallucinated"]
-    source_citation: str  # e.g., "Line 45 in hooks.py"
-    confidence: float = Field(default=1.0, ge=0, le=1)
+    """🔍 Individual finding from a detective (Repo, Doc, or Vision)."""
+    goal: str = Field(description="The specific forensic instruction from the rubric")
+    found: bool = Field(description="Objective existence of the artifact")
+    content: Optional[str] = Field(default=None, description="The raw code snippet or log entry")
+    location: str = Field(description="File path, line number, or commit hash")
+    rationale: str = Field(description="Technical explanation for the finding")
+    confidence: float = Field(ge=0, le=1)
 
-# --- 2. JUDICIAL OPINION MODEL ---
-# Judges must use this to argue their perspective.
+# --- Protocol A: Project Health (Git & Versioning) ---
+class ProjectMetadata(BaseModel):
+    """📊 High-level audit of the project's development history."""
+    git_log: List[str] = Field(default_factory=list, description="Output of git log --oneline --reverse")
+    has_uv_lock: bool = Field(default=False, description="Presence of uv.lock file")
+    version: str = Field(default="0.0.0", description="Current version in pyproject.toml")
+    progression_score: float = Field(default=0.0, description="Score based on Env -> Tool -> Graph evolution")
+
+# --- Protocol B: Judicial Opinion (The Interpretation) ---
 class JudicialOpinion(BaseModel):
-    judge_persona: Literal["Prosecutor", "Defense", "TechLead"]
-    tier: Literal["Basic", "Essential", "Advanced"]
+    """⚖️ Interpretive judgment on a specific rubric criterion."""
+    judge: Literal["Prosecutor", "Defense", "TechLead"]
+    criterion_id: str
     score: int = Field(ge=1, le=5)
     argument: str
-    evidence_referenced: List[str]
+    cited_evidence: List[str]
 
-# --- 3. THE GLOBAL AGENT STATE ---
-# The shared memory of the swarm.
+# --- The Graph State: The Courtroom Record ---
 class AgentState(TypedDict):
+    """🏛️ The global state governing the courtroom process."""
     repo_url: str
     pdf_path: str
+    rubric_dimensions: List[Dict]
     
-    # Discovery Layer (Parallel Detectives append here)
-    forensic_evidence: Annotated[List[Evidence], operator.add]
+    # 🕵️ Raw findings from parallel detectives
+    # operator.ior merges dictionaries from different nodes
+    evidences: Annotated[Dict[str, List[Evidence]], operator.ior]
     
-    # Judicial Layer (Parallel Judges append here)
-    judicial_opinions: Annotated[List[JudicialOpinion], operator.add]
+    # 🎯 The refined "Best Truth" populated by the aggregator
+    refined_evidences: List[Evidence]
     
-    # Final Executive Layer
-    final_score: float
-    final_audit_report: str
+    # 📊 Audit data for git history and environment
+    metadata: ProjectMetadata
     
-    current_status: str
+    # ⚖️ Judicial interpretations appended over time
+    # operator.add ensures opinions from different judges are preserved
+    opinions: Annotated[List[JudicialOpinion], operator.add]
     
+    final_report: Optional[str] = None
