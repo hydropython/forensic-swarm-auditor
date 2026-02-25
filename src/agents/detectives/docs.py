@@ -4,35 +4,38 @@ from src.core.state import Evidence
 
 class DocAnalyst:
     """
-    🕵️ The Context Detective: Parses PDFs and extracts specific claims
-    to compare against the structural reality found in the repo.
+    🕵️ The Context Detective: Parses PDFs to extract architectural claims.
     """
     def __init__(self, pdf_path: Path):
         self.pdf_path = pdf_path
         self.converter = DocumentConverter()
-        self._content = None
+        self._markdown_content: str = ""
 
     def ingest_pdf(self):
-        """📄 Converts PDF to a structured format for analysis."""
+        """📄 Converts the PDF into a structured Markdown format."""
         if not self.pdf_path.exists():
-            raise FileNotFoundError(f"PDF not found at {self.pdf_path}")
+            raise FileNotFoundError(f"Missing PDF at: {self.pdf_path}")
         
+        # Convert PDF to Markdown to keep headers and structure intact
         result = self.converter.convert(str(self.pdf_path))
-        # Exporting to markdown provides a clean structure for the LLM
-        self._content = result.document.export_to_markdown()
+        self._markdown_content = result.document.export_to_markdown()
 
-    def extract_claim(self, goal: str) -> Evidence:
-        """🔍 Search the document for specific architectural claims."""
-        # In a full RAG implementation, we would use embeddings here.
-        # For our 'RAG-lite' version, we'll focus on structured parsing.
+    def find_claim(self, keyword: str) -> Evidence:
+        """🔍 Scans the Markdown for specific technical claims."""
+        # Simple RAG-lite: Check for keyword presence and extract context
+        found = keyword.lower() in self._markdown_content.lower()
         
-        found = goal.lower() in self._content.lower() if self._content else False
-        
+        # Logic to grab a small snippet around the keyword if found
+        snippet = None
+        if found:
+            start_idx = self._markdown_content.lower().find(keyword.lower())
+            snippet = self._markdown_content[max(0, start_idx-100) : start_idx+300]
+
         return Evidence(
-            goal=goal,
+            goal=f"Check for claim: {keyword}",
             found=found,
-            content=self._content[:500] if found else None, # Return a snippet
+            content=snippet,
             location=str(self.pdf_path),
-            rationale=f"Searched document for: {goal}",
-            confidence=0.8 if found else 0.2
+            rationale=f"Performed structural scan for '{keyword}' in PDF.",
+            confidence=0.9 if found else 0.1
         )
