@@ -1,18 +1,37 @@
 [project]
 name = "forensic-swarm-auditor"
-version = "1.0.0"
-description = "High-performance multi-agent forensic auditor"
-# 🐍 Explicitly targeting modern Python
-requires-python = ">=3.11"
-
+version = "0.1.0"
+description = "A multi-agent forensic system for automated technical audits and orchestration fraud detection."
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+authors = [
+    { name = "Addisu", email = "your.email@example.com" }
+]
+keywords = [
+    "multi-agent",
+    "forensics",
+    "langgraph",
+    "audit",
+    "ai-governance"
+]
+classifiers = [
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Quality Assurance",
+    "Intended Audience :: Developers",
+]
 dependencies = [
-    "langgraph>=0.2.0,<0.3.0",    # 🕸️ Stable orchestration
-    "langchain-openai~=0.1.0",    # 🤖 LLM integration
-    "docling>=2.0.0,<3.0.0",      # 📄 PDF structural parsing
-    "pydantic>=2.7.0,<3.0.0",     # 🛡️ Fast data validation
-    "python-dotenv>=1.0.1",       # 🔑 Secret management
+    "langgraph>=0.2.0",
+    "langchain-openai>=0.1.0",
+    "pydantic-settings>=2.0.0",
+    "python-dotenv>=1.0.0",
+    "pypdf>=5.1.0",
 ]
 
+[project.urls]
+Repository = "https://github.com/your-username/forensic-swarm-auditor"
+Issues = "https://github.com/your-username/forensic-swarm-auditor/issues"
+
 [tool.uv]
-# This tells uv to manage the lockfile automatically
-package = true
+managed = true
+package = false

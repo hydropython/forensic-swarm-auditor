@@ -1,24 +1,32 @@
-import asyncio
-from src.infrastructure.sandbox import ForensicSandbox
-from src.core.engine import graph
+import os
+from dotenv import load_dotenv
+from src.engine import graph
 
-async def main():
-    repo = "https://github.com/example/student-repo"
-    sandbox = ForensicSandbox(repo)
+def run_forensic_audit(repo_url: str, pdf_path: str):
+    load_dotenv()
     
-    with sandbox.create_workspace() as workspace:
-        initial_state = {
-            "workspace_path": str(workspace),
-            "repo_url": repo,
-            "evidences": {},
-            "refined_evidences": [],
-            "metadata": {"version": "1.0.0", "progression_score": 0.0},
-            "opinions": []
-        }
-        
-        print(f"⚖️  Trial starting for {repo}...")
-        final_state = await graph.ainvoke(initial_state)
-        print("📜 Final Verdict Generated.")
+    # Initial State
+    initial_state = {
+        "repo_url": repo_url,
+        "pdf_path": pdf_path,
+        "workspace_path": "./temp_audit", # Local sandbox
+        "rubric_dimensions": [], # To be populated by doc_analyst
+        "evidences": {},
+        "refined_evidences": [],
+        "opinions": [],
+        "metadata": None 
+    }
+
+    print(f"🕵️‍♂️ Starting Swarm Audit for: {repo_url}")
+    
+    # Run the Graph
+    final_state = graph.invoke(initial_state)
+    
+    print("\n--- 🏛️ JUDICIAL VERDICT ---")
+    print(final_state.get("final_report", "Audit failed to reach a verdict."))
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    # Test it with a real repo
+    REPO = "https://github.com/example/target-repo"
+    RUBRIC = "rubrics/week2_criteria.pdf"
+    run_forensic_audit(REPO, RUBRIC)

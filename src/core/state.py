@@ -35,20 +35,19 @@ class AgentState(TypedDict):
     """🏛️ The global state governing the courtroom process."""
     repo_url: str
     pdf_path: str
+    workspace_path: str  # Path to the cloned repo in the sandbox
     rubric_dimensions: List[Dict]
     
-    # 🕵️ Raw findings from parallel detectives
-    # operator.ior merges dictionaries from different nodes
+    # 🕵️ operator.ior merges dictionaries (Fan-In from Detectives)
     evidences: Annotated[Dict[str, List[Evidence]], operator.ior]
     
-    # 🎯 The refined "Best Truth" populated by the aggregator
+    # 🎯 Refined by the Aggregator
     refined_evidences: List[Evidence]
     
-    # 📊 Audit data for git history and environment
+    # 📊 Audit data for git history
     metadata: ProjectMetadata
     
-    # ⚖️ Judicial interpretations appended over time
-    # operator.add ensures opinions from different judges are preserved
+    # ⚖️ operator.add appends list items (Fan-In from Judges)
     opinions: Annotated[List[JudicialOpinion], operator.add]
     
-    final_report: Optional[str] = None
+    final_report: Optional[str]
