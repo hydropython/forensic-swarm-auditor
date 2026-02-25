@@ -6,33 +6,41 @@ def prosecutor_node(state: AgentState):
     ⚖️ Statute of Orchestration (Prosecutor's Handbook)
     Charges: Orchestration Fraud, Hallucination Liability.
     """
-    # 1. Initialize the LLM with Structured Output (Requirement Phase 3)
-    llm = ChatOpenAI(model="gpt-4o")
+    # 1. Initialize with strict schema enforcement
+    llm = ChatOpenAI(model="gpt-4o", temperature=0) # Temp 0 for judicial consistency
     structured_llm = llm.with_structured_output(JudicialOpinion)
 
-    # 2. Prepare the "Evidence Brief"
-    # We feed the judge the refined evidence and the metadata
-    evidence_text = "\n".join([f"- {e.goal}: {e.rationale} (Found: {e.found})" 
-                              for e in state["refined_evidences"]])
+    # 2. Extract context from the "Fact Record"
+    evidence_text = "\n".join([
+        f"- GOAL: {e.goal} | FOUND: {e.found} | RATIONALE: {e.rationale} | LOC: {e.location}" 
+        for e in state["refined_evidences"]
+    ])
     
-    prompt = f"""
-    SYSTEM: You are the PROSECUTOR. Your goal is to find "Orchestration Fraud".
+    git_context = "\n".join(state['metadata'].git_log[-10:]) # Last 10 commits
+
+    system_prompt = f"""
+    SYSTEM: You are the PROSECUTOR. Your goal is to identify "Orchestration Fraud" and technical gaps.
     
-    FORENSIC EVIDENCE:
+    CRIMINAL STATUTES:
+    1. Orchestration Fraud: Claiming a multi-agent system when the code is actually linear.
+    2. Hallucination Liability: Claiming features in documentation that do not exist in code.
+    3. Structural Negligence: Missing core files (pyproject.toml, .env.example).
+
+    FORENSIC EVIDENCE PROVIDED BY CLERK:
     {evidence_text}
     
-    GIT LOG HISTORY:
-    {state['metadata'].git_log}
+    RECENT GIT HISTORY:
+    {git_context}
     
-    STATUTE OF ORCHESTRATION:
-    - Violation: If the flow is linear (A -> B -> C) instead of parallel.
-    - Violation: If documentation claims features (like AST) that aren't in the code.
-    
-    TASK: Render a verdict with a score (1-5) and specific arguments citing the evidence.
+    TASK: Analyze the evidence objectively. If a requirement is missing, you MUST penalize. 
+    Provide a score (1-5) where 1 is "Major Violation" and 5 is "Compliant".
     """
 
-    # 3. Invoke the LLM
-    opinion = structured_llm.invoke(prompt)
+    # 3. Invoke and return
+    # The return is wrapped in a list because the state uses operator.add
+    opinion = structured_llm.invoke(system_prompt)
     
-    # 4. Return as an appended list (thanks to operator.add in state)
+    # Ensure the 'judge' field is correctly set to Prosecutor
+    opinion.judge = "Prosecutor"
+    
     return {"opinions": [opinion]}
