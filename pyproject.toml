@@ -1,14 +1,18 @@
 [project]
-name = "automaton-auditor"
-version = "0.1.0"
+name = "forensic-swarm-auditor"
+version = "1.0.0"
+description = "High-performance multi-agent forensic auditor"
+# 🐍 Explicitly targeting modern Python
+requires-python = ">=3.11"
+
 dependencies = [
-    "langgraph>=0.0.10",
-    "langchain-google-genai",
-    "pydantic>=2.0.0",
-    "GitPython",
-    "python-dotenv",
-    "docling", # For the DocAnalyst PDF parsing
+    "langgraph>=0.2.0,<0.3.0",    # 🕸️ Stable orchestration
+    "langchain-openai~=0.1.0",    # 🤖 LLM integration
+    "docling>=2.0.0,<3.0.0",      # 📄 PDF structural parsing
+    "pydantic>=2.7.0,<3.0.0",     # 🛡️ Fast data validation
+    "python-dotenv>=1.0.1",       # 🔑 Secret management
 ]
 
 [tool.uv]
-managed = true
+# This tells uv to manage the lockfile automatically
+package = true

@@ -1,41 +1,35 @@
 from pathlib import Path
 from docling.document_converter import DocumentConverter
-from src.core.state import Evidence
+from src.core.state import AgentState, Evidence
 
 class DocAnalyst:
-    """
-    🕵️ The Context Detective: Parses PDFs to extract architectural claims.
-    """
     def __init__(self, pdf_path: Path):
         self.pdf_path = pdf_path
         self.converter = DocumentConverter()
         self._markdown_content: str = ""
 
     def ingest_pdf(self):
-        """📄 Converts the PDF into a structured Markdown format."""
-        if not self.pdf_path.exists():
-            raise FileNotFoundError(f"Missing PDF at: {self.pdf_path}")
-        
-        # Convert PDF to Markdown to keep headers and structure intact
+        if not self.pdf_path.exists(): return False
         result = self.converter.convert(str(self.pdf_path))
         self._markdown_content = result.document.export_to_markdown()
+        return True
 
     def find_claim(self, keyword: str) -> Evidence:
-        """🔍 Scans the Markdown for specific technical claims."""
-        # Simple RAG-lite: Check for keyword presence and extract context
         found = keyword.lower() in self._markdown_content.lower()
-        
-        # Logic to grab a small snippet around the keyword if found
         snippet = None
         if found:
-            start_idx = self._markdown_content.lower().find(keyword.lower())
-            snippet = self._markdown_content[max(0, start_idx-100) : start_idx+300]
+            idx = self._markdown_content.lower().find(keyword.lower())
+            snippet = self._markdown_content[max(0, idx-100) : idx+300]
+        return Evidence(goal=f"Claim: {keyword}", found=found, content=snippet,
+                        location=str(self.pdf_path), rationale="Docling Scan", 
+                        confidence=0.9 if found else 0.2)
 
-        return Evidence(
-            goal=f"Check for claim: {keyword}",
-            found=found,
-            content=snippet,
-            location=str(self.pdf_path),
-            rationale=f"Performed structural scan for '{keyword}' in PDF.",
-            confidence=0.9 if found else 0.1
-        )
+def doc_analyst_node(state: AgentState):
+    """🕵️ Protocol A.2: Documentation Analysis"""
+    analyst = DocAnalyst(Path(state["pdf_path"]))
+    if not analyst.ingest_pdf():
+        return {"evidences": {"doc_detective": [Evidence(goal="PDF Ingestion", found=False, location="N/A", rationale="File missing", confidence=1.0)]}}
+    
+    claims = ["Fan-In / Fan-Out", "Dialectical Synthesis"]
+    findings = [analyst.find_claim(c) for c in claims]
+    return {"evidences": {"doc_detective": findings}}

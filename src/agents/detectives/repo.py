@@ -1,37 +1,47 @@
 import ast
+import subprocess
+import tomllib  # Built-in for parsing pyproject.toml
 from pathlib import Path
-from src.core.state import Evidence
+from src.core.state import AgentState, Evidence, ProjectMetadata
 
-class ASTInvestigator:
-    """
-    Interrogates Python source code to find structural proof of 
-    LangGraph implementations and Pydantic models.
-    """
+def repo_investigator_node(state: AgentState):
+    """🎯 Protocol A.1: Finalized Git & Versioning Forensic Node"""
+    path = Path(state["workspace_path"]) 
     
-    def __init__(self, workspace_path: Path):
-        self.workspace_path = workspace_path
+    # 1. Git Forensic Check
+    git_cmd = subprocess.run(
+        ["git", "-C", str(path), "log", "--oneline", "--reverse"], 
+        capture_output=True, text=True
+    )
+    commits = git_cmd.stdout.strip().split("\n") if git_cmd.returncode == 0 else []
+    
+    # 2. Version & Environment Audit
+    version = "0.0.0"
+    pyproject_path = path / "pyproject.toml"
+    if pyproject_path.exists():
+        try:
+            data = tomllib.loads(pyproject_path.read_text())
+            version = data.get("project", {}).get("version", "0.0.0")
+        except: pass
 
-    def verify_langgraph_usage(self) -> Evidence:
-        """Checks for StateGraph instantiation in the source code."""
-        found_graph = False
-        rationale = "No StateGraph instantiation found in .py files."
-        
-        for py_file in self.workspace_path.rglob("*.py"):
-            tree = ast.parse(py_file.read_text(errors='ignore'))
-            for node in ast.walk(tree):
-                # Look for 'StateGraph(' call
-                if isinstance(node, ast.Call):
-                    if isinstance(node.func, ast.Name) and node.func.id == "StateGraph":
-                        found_graph = True
-                        rationale = f"Found StateGraph instantiation in {py_file.name}"
-                        break
-        
-        return Evidence(
-            goal="Verify StateGraph Implementation",
-            found=found_graph,
-            location=str(self.workspace_path),
-            rationale=rationale,
-            confidence=1.0 if found_graph else 0.5
-        )
+    # 3. Progression Scoring (Evolution Logic)
+    # Check if they actually evolved the code across commits
+    history = git_cmd.stdout.lower()
+    prog_score = 0.0
+    if "env" in history: prog_score += 0.3
+    if "agent" in history or "node" in history: prog_score += 0.4
+    if "graph" in history or "workflow" in history: prog_score += 0.3
 
-# --- COMMIT: Implemented AST Structural Interrogation Logic ---
+    # 4. AST Check (Your logic)
+    inv = ASTInvestigator(path)
+    graph_evidence = inv.verify_langgraph_usage()
+
+    return {
+        "metadata": ProjectMetadata(
+            git_log=commits, 
+            has_uv_lock=(path / "uv.lock").exists(),
+            version=version,
+            progression_score=prog_score
+        ),
+        "evidences": {"repo_detective": [graph_evidence]}
+    }
