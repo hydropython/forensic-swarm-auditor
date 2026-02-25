@@ -10,56 +10,6 @@
 The **Forensic Swarm Auditor** is an advanced autonomous system designed to evaluate software repositories against complex PDF-based rubrics. By integrating **Structural AST Analysis** (Symbolic logic) with an **Adversarial Judicial Layer** (Neuro reasoning), the system provides verifiable, explainable audits that eliminate the subjectivity common in standard LLM code reviews.
 
 
-
-## 📂 Project Structure
-```text
-# 🏛️ Forensic Swarm Auditor
-> **Neuro-Symbolic Multi-Agent Judicial System for High-Integrity Code Auditing**
-
-[![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-blue.svg)](https://www.python.org/)
-[![Managed by uv](https://img.shields.io/badge/managed%20by-uv-arc.svg)](https://github.com/astral-sh/uv)
-[![Orchestrated by LangGraph](https://img.shields.io/badge/orchestrated%20by-LangGraph-orange.svg)](https://langchain-ai.github.io/langgraph/)
-[![Tracing](https://img.shields.io/badge/tracing-LangSmith-green.svg)](https://smith.langchain.com/)
-
-## 📖 Overview
-The **Forensic Swarm Auditor** is an advanced autonomous system designed to evaluate software repositories against complex PDF-based rubrics. By integrating **Structural AST Analysis** (Symbolic logic) with an **Adversarial Judicial Layer** (Neuro reasoning), the system provides verifiable, explainable audits that eliminate the subjectivity common in standard LLM code reviews.
-
-
-
-## 📂 Project Structure (The Three-Layer Swarm)
-Following the modular layout at `src/agents/`:
-
-```text
-# 🏛️ Forensic Swarm Auditor
-> **Neuro-Symbolic Multi-Agent Judicial System for High-Integrity Code Auditing**
-
-[![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-blue.svg)](https://www.python.org/)
-[![Managed by uv](https://img.shields.io/badge/managed%20by-uv-arc.svg)](https://github.com/astral-sh/uv)
-[![Orchestrated by LangGraph](https://img.shields.io/badge/orchestrated%20by-LangGraph-orange.svg)](https://langchain-ai.github.io/langgraph/)
-[![Tracing](https://img.shields.io/badge/tracing-LangSmith-green.svg)](https://smith.langchain.com/)
-
-## 📖 Overview
-The **Forensic Swarm Auditor** is a production-grade autonomous system designed to evaluate software repositories against complex PDF-based rubrics. By integrating **Structural AST Analysis** (Symbolic logic) with an **Adversarial Judicial Layer** (Neuro reasoning), the system provides verifiable, explainable audits that eliminate the subjectivity common in standard LLM code reviews.
-
-
-
-## 📂 Detailed Project Structure
-Following the modular architecture at `src/`:
-
-```text
-# 🏛️ Forensic Swarm Auditor
-> **Neuro-Symbolic Multi-Agent Judicial System for High-Integrity Code Auditing**
-
-[![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-blue.svg)](https://www.python.org/)
-[![Managed by uv](https://img.shields.io/badge/managed%20by-uv-arc.svg)](https://github.com/astral-sh/uv)
-[![Orchestrated by LangGraph](https://img.shields.io/badge/orchestrated%20by-LangGraph-orange.svg)](https://langchain-ai.github.io/langgraph/)
-[![Tracing](https://img.shields.io/badge/tracing-LangSmith-green.svg)](https://smith.langchain.com/)
-
-## 📖 Overview
-The **Forensic Swarm Auditor** is a production-grade autonomous system designed to evaluate software repositories against complex PDF-based rubrics. By integrating **Structural AST Analysis** (Symbolic logic) with an **Adversarial Judicial Layer** (Neuro reasoning), the system provides verifiable, explainable audits that eliminate the subjectivity common in standard LLM code reviews.
-
-
-
 ## 📂 Detailed Project Structure
 Following the modular architecture with dedicated infrastructure and core orchestration:
 
