@@ -1,40 +1,93 @@
-# Automaton Auditor: Multi-Agent Digital Courtroom
+# 🏛️ Forensic Swarm Auditor
+> **Neuro-Symbolic Multi-Agent Judicial System for High-Integrity Code Auditing**
 
-Automaton Auditor is a high-fidelity **LangGraph** orchestration engine designed to evaluate the structural and conceptual integrity of AI-generated repositories. By implementing a **Dialectical Synthesis** architecture, the system isolates objective forensic discovery from subjective judicial deliberation.
+[![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-blue.svg)](https://www.python.org/)
+[![Managed by uv](https://img.shields.io/badge/managed%20by-uv-arc.svg)](https://github.com/astral-sh/uv)
+[![Orchestrated by LangGraph](https://img.shields.io/badge/orchestrated%20by-LangGraph-orange.svg)](https://langchain-ai.github.io/langgraph/)
+[![Tracing](https://img.shields.io/badge/tracing-LangSmith-green.svg)](https://smith.langchain.com/)
 
----
-
-## Architectural Topology
-
-The system is built on a **Fan-Out/Fan-In** orchestration model. As of the Phase 2 milestone, the **Forensic Detective Layer** is fully implemented, allowing for parallel interrogation of code, documentation, and visual artifacts.
-
-### 🧬 State Management & Reducers
-The system's "Constitution" is defined in `src/state.py`. We utilize **Reducers** to handle concurrent agent outputs without race conditions:
-* **`operator.ior` (In-place OR):** Merges forensic evidence dictionaries from multiple agents into the global state.
-* **`operator.add`:** Accumulates judicial opinions into a unified consensus stream for final synthesis.
+## 📖 Overview
+The **Forensic Swarm Auditor** is an advanced autonomous system designed to evaluate software repositories against complex PDF-based rubrics. By integrating **Structural AST Analysis** (Symbolic logic) with an **Adversarial Judicial Layer** (Neuro reasoning), the system provides verifiable, explainable audits that eliminate the subjectivity common in standard LLM code reviews.
 
 
 
----
+## 📂 Project Structure
+```text
+forensic-swarm-auditor/
+├── README.md
+├── pyproject.toml
+├── .env.example
+├── main.py                     # Entry point with CLI flags
+├── src/
+│   ├── engine.py               # LangGraph workflow orchestration
+│   ├── core/
+│   │   ├── config.py           # Pydantic settings & API management
+│   │   └── state.py            # Typed graph state definitions
+│   ├── agents/
+│   │   ├── detectives/
+│   │   │   ├── repo.py         # Git forensics & AST structural checks
+│   │   │   └── doc_analyst.py  # Semantic PDF ingestion
+│   │   └── judges/
+│   │       ├── prosecutor.py   # Adversarial non-compliance analysis
+│   │       ├── defense.py      # Contextual intent justification
+│   │       └── chief_justice.py # Final weighted consensus synthesis
+│   └── utils/
+│       ├── ast_tools.py        # Concrete structural verification logic
+│       └── pdf_engine.py       # Context-aware chunking utilities
+├── tests/
+│   ├── unit/
+│   └── integration/
+└── .github/
+    └── workflows/              # CI/CD for contract validation
+```
 
-## Layer 1: Forensic Detectives (Phase 2)
 
-Each detective node is a specialized agent that interrogates a specific artifact using high-precision tooling:
+## 🏗️ Core Architecture (The Chimera Standard)
+This project implements a neuro-symbolic approach to ensure every audit is grounded in concrete evidence:
 
-1. **RepoInvestigator (The AST Specialist):** - **Method:** Traverses the Abstract Syntax Tree (AST) to verify functional wiring.
-   - **Verification:** Validates Typed State inheritance (`BaseModel`) and structural parallelism in `graph.py`.
-2. **DocAnalyst (The Context Hunter):** - **Method:** Uses RAG-lite to verify documentation claims.
-   - **Verification:** Cross-references cited file paths against physical disk telemetry to flag architectural hallucinations.
-3. **VisionInspector (The Flow Auditor):** - **Status:** Integrated for Phase 3 multimodal diagram verification via Gemini Pro Vision.
+### 🕵️ 1. The Detective Layer (Symbolic)
+* **Structural Invariants**: Instead of simple regex searches, we utilize Python's **Abstract Syntax Tree (AST)** to verify the actual existence of classes, specific method signatures, and inheritance patterns.
+* **Forensic Sandboxing**: Repositories are cloned and analyzed in isolated, temporary workspaces to ensure environment purity and safety.
+* **Git Resilience**: Implements typed exceptions (`AuthError`, `RepoNotFoundError`) to handle infrastructure failures gracefully without crashing the swarm.
 
+### ⚖️ 2. The Judicial Layer (Adversarial)
+* **Prosecutor Agent**: Actively searches for non-compliance, technical debt, and rubric violations.
+* **Defense Agent**: Contextualizes engineering decisions, identifying valid implementation patterns and workarounds.
+* **Tech Lead Agent**: Evaluates the system for architectural maturity and best practices.
 
----
+### 🏛️ 3. Synthesis Engine (Consensus)
+* **Weighted Multi-Agent Consensus**: A final **Chief Justice** node performs a weighted synthesis of all judicial opinions, producing a deterministic score and an explainable verdict.
 
-## 🛠️ Infrastructure
+## 🚀 Setup & Installation
 
-### 1. Dependency Management
-This project utilizes **uv** for reproducible, sub-second dependency resolution.
-```bash
-pip install uv
-uv sync
+Follow these steps to initialize the forensic environment:
 
+* **Step 1: Prerequisites**
+    Ensure you have [uv](https://github.com/astral-sh/uv) installed for reproducible dependency management.
+    ```vbash
+    powershell -c "irm [https://astral.sh/uv/install.ps1](https://astral.sh/uv/install.ps1) | iex"
+    ```
+
+* **Step 2: Clone & Sync**
+    ```vbash
+    git clone [https://github.com/your-username/forensic-swarm-auditor.git](https://github.com/your-username/forensic-swarm-auditor.git)
+    cd forensic-swarm-auditor
+    uv sync
+    ```
+
+* **Step 3: Configure Environment Variables**
+    Create your local environment file:
+    ```vbash
+    cp .env.example .env
+    ```
+    Populate your `.env` file with the following required API keys:
+    * **OPENAI_API_KEY**: Your primary judicial brain.
+    * **GITHUB_TOKEN**: For authenticated repository access.
+    * **LANGCHAIN_API_KEY**: For LangSmith forensic tracing.
+
+## ⚖️ Execution
+
+To run a full forensic audit against a target repository and a PDF rubric, execute the following command:
+
+```vbash
+uv run python main.py --repo "[https://github.com/example/target-repo](https://github.com/example/target-repo)" --rubric "./docs/rubric.pdf"
