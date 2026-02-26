@@ -4,6 +4,7 @@ import stat
 import sys
 from datetime import datetime
 from src.core.engine import forensic_app
+from src.agents.detectives.repo import repo_investigator
 
 def remove_readonly(func, path, _):
     """🛠️ Windows Fix: Resets file permissions for .git folders."""
