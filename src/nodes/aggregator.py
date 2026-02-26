@@ -1,26 +1,55 @@
-from typing import Dict
-from src.core.state import AgentState, Evidence
+from typing import List
+# Ensure these match your src/core/state.py exactly
+from src.core.state import ForensicState, Evidence, ProjectMetadata
 
-def evidence_aggregator(state: AgentState) -> Dict:
+def check_evidence_quality(state: ForensicState) -> str:
     """
-    🎯 The 'Clerk of Court' node: Deduplicates findings and prepares 
-    the 'Final Fact Record' for the Judges.
+    🔀 THE ROUTER: This tells the graph where to go next.
+    Matches the keys in your engine's conditional_edges mapping.
     """
-    # 1. Flatten all evidence from all parallel detectives
-    all_raw_evidence = []
-    for detective_name, evidence_list in state["evidences"].items():
-        all_raw_evidence.extend(evidence_list)
-
-    # 2. Conflict Resolution: Keep only the highest confidence evidence per goal
-    # This prevents the DocAnalyst and RepoInvestigator from clashing
-    best_findings: Dict[str, Evidence] = {}
+    # Look at the refined_evidences list we just created in the aggregator node
+    evidences = state.get("refined_evidences", [])
     
-    for ev in all_raw_evidence:
-        # If we find a match, the one with higher confidence (0.0 to 1.0) wins
-        if ev.goal not in best_findings or ev.confidence > best_findings[ev.goal].confidence:
-            best_findings[ev.goal] = ev
+    # Logic: If we found any evidence at all, move to Judicial Phase
+    if len(evidences) > 0:
+        print(f"✅ Evidence sufficient ({len(evidences)} items). Moving to Judicial Phase...")
+        return "sufficient"
+    
+    # If the detectives came up empty, loop back to the Repo Investigator
+    print("⚠️ Evidence incomplete. Re-routing to Detectives for deeper scan...")
+    return "incomplete"
 
-    # 3. Protocol A.1 Check: Merge Git Metadata into rationale if needed
-    # (Optional: You can add logic here to explicitly flag if 'progression_score' is low)
-
-    return {"refined_evidences": list(best_findings.values())}
+def evidence_aggregator(state: ForensicState):
+    """
+    🎯 THE NODE: Aggregates raw findings into a refined list.
+    Ensures Pydantic models are preserved to avoid 'AttributeError'.
+    """
+    print("🎯 Aggregator: Processing detective findings...")
+    
+    all_findings = []
+    
+    # 'evidences' is a Dict[str, List[Evidence]] thanks to operator.ior in state.py
+    raw_evidences = state.get("evidences", {})
+    
+    # Flatten all dictionary values into a single list of Evidence objects
+    for source_key, findings_list in raw_evidences.items():
+        if isinstance(findings_list, list):
+            all_findings.extend(findings_list)
+        else:
+            # Handle cases where a detective might have sent a single Evidence object
+            all_findings.append(findings_list)
+    
+    # 🛡️ FIX: Ensure metadata remains a Pydantic object
+    current_metadata = state.get("metadata")
+    
+    # If metadata is missing or was passed as a dict, convert it back to the Model
+    if current_metadata is None:
+        current_metadata = ProjectMetadata()
+    elif isinstance(current_metadata, dict):
+        current_metadata = ProjectMetadata(**current_metadata)
+    
+    # Return the updated state keys
+    return {
+        "refined_evidences": all_findings,
+        "metadata": current_metadata
+    }

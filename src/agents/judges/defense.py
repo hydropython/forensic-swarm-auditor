@@ -3,32 +3,49 @@ from src.core.state import AgentState, JudicialOpinion
 
 def defense_node(state: AgentState):
     """
-    ⚖️ The Public Defender (Engineering Intent)
-    Mission: Highlight mitigation, effort, and unconventional logic.
+    ⚖️ The Defense Attorney: Focuses on effort, progress, and 
+    mitigating circumstances for the developer.
     """
-    llm = ChatOpenAI(model="gpt-4o", temperature=0.3) # Slightly higher temp for creative reasoning
+    print("⚖️ Defense: Building the case for the developers...")
+    
+    # 1. Initialize LLM
+    llm = ChatOpenAI(model="gpt-4o", temperature=0.7) 
     structured_llm = llm.with_structured_output(JudicialOpinion)
 
-    evidence_text = "\n".join([
-        f"- {e.goal}: {e.rationale} (Found: {e.found})" 
-        for e in state["refined_evidences"]
-    ])
+    # 2. DATA SHIELD: Handle Dict or Pydantic Object
+    refined_evidences = state.get("refined_evidences", [])
+    evidence_list = []
 
+    for e in refined_evidences:
+        if isinstance(e, dict):
+            goal = e.get("goal", "Unknown")
+            rationale = e.get("rationale", "N/A")
+            found = e.get("found", False)
+        else:
+            goal = getattr(e, "goal", "Unknown")
+            rationale = getattr(e, "rationale", "N/A")
+            found = getattr(e, "found", False)
+        
+        status = "Implemented" if found else "In-Progress/Missing"
+        evidence_list.append(f"- {goal}: {status} | Context: {rationale}")
+    
+    evidence_text = "\n".join(evidence_list)
+
+    # 3. Judicial Defense Prompt
     prompt = f"""
-    SYSTEM: You are the DEFENSE ATTORNEY. Your goal is to find reasons why the project is VALID.
+    SYSTEM: You are the DEFENSE ATTORNEY. Your job is to find the "Silver Lining" in the code.
+    Highlight where the developer showed intent or partial progress. 
+    Explain why technical debt might be justified for rapid prototyping.
     
     FORENSIC EVIDENCE:
     {evidence_text}
     
-    YOUR MANDATE:
-    1. Contextualize Gaps: Is a missing 'AST' replaced by high-quality regex or custom logic?
-    2. Effort Analysis: Does the Git log show significant iteration and learning?
-    3. Advocacy: Argue for a 5/5 score if the core intent of the rubric is met, even if the implementation is non-standard.
-    
-    TASK: Render a verdict (Score 1-5) citing evidence that justifies the developer's choices.
+    TASK: Provide a score (1-5) and your argument defending the architectural choices.
+    1 is "Negligent", 5 is "Exceptional Effort".
     """
-
+    
+    # 4. Invoke and Return
     opinion = structured_llm.invoke(prompt)
-    opinion.judge = "Defense" # Ensure correct labeling
+    opinion.judge = "Defense" # Ensure consistency for the Chief Justice
     
     return {"opinions": [opinion]}

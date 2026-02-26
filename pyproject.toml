@@ -26,6 +26,7 @@ dependencies = [
     "pydantic-settings>=2.0.0",
     "python-dotenv>=1.0.0",
     "pypdf>=5.1.0",
+    "docling>=2.75.0",
 ]
 
 [project.urls]

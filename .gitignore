@@ -11,3 +11,7 @@ __pycache__/
 .pytest_cache/
 data/input/*
 !data/input/.gitkeep
+temp_audit_workspace/
+.venv/
+__pycache__/
+.env
