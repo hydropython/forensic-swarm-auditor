@@ -1,5 +1,5 @@
 import operator
-from typing import Annotated, Dict, List, Literal, Optional
+from typing import Annotated, Dict, List, Literal, Optional, Any
 from pydantic import BaseModel, Field
 from typing_extensions import TypedDict
 
@@ -31,7 +31,7 @@ class JudicialOpinion(BaseModel):
     cited_evidence: List[str]
 
 # --- The Graph State: The Courtroom Record ---
-class AgentState(TypedDict):
+class ForensicState(TypedDict):
     """🏛️ The global state governing the courtroom process."""
     repo_url: str
     pdf_path: str
@@ -51,3 +51,6 @@ class AgentState(TypedDict):
     opinions: Annotated[List[JudicialOpinion], operator.add]
     
     final_report: Optional[str]
+
+# Alias for backward compatibility if needed
+AgentState = ForensicState

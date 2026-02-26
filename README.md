@@ -1,4 +1,4 @@
-# 🏛️ Forensic Swarm Auditor
+#  Forensic Swarm Auditor
 > **Neuro-Symbolic Multi-Agent Judicial System for High-Integrity Code Auditing**
 
 [![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-blue.svg)](https://www.python.org/)
@@ -10,7 +10,7 @@
 The **Forensic Swarm Auditor** is an advanced autonomous system designed to evaluate software repositories against complex PDF-based rubrics. By integrating **Structural AST Analysis** (Symbolic logic) with an **Adversarial Judicial Layer** (Neuro reasoning), the system provides verifiable, explainable audits that eliminate the subjectivity common in standard LLM code reviews.
 
 
-## 📂 Detailed Project Structure
+##  Detailed Project Structure
 Following the modular architecture with dedicated infrastructure and core orchestration:
 
 ```text
@@ -47,23 +47,23 @@ forensic-swarm-auditor/
 ```
 
 
-## 🏗️ Core Architecture (The Chimera Standard)
+##  Core Architecture (The Chimera Standard)
 This project implements a neuro-symbolic approach to ensure every audit is grounded in concrete evidence:
 
-### 🕵️ 1. The Detective Layer (Symbolic)
+###  1. The Detective Layer (Symbolic)
 * **Structural Invariants**: Instead of simple regex searches, we utilize Python's **Abstract Syntax Tree (AST)** to verify the actual existence of classes, specific method signatures, and inheritance patterns.
 * **Forensic Sandboxing**: Repositories are cloned and analyzed in isolated, temporary workspaces to ensure environment purity and safety.
 * **Git Resilience**: Implements typed exceptions (`AuthError`, `RepoNotFoundError`) to handle infrastructure failures gracefully without crashing the swarm.
 
-### ⚖️ 2. The Judicial Layer (Adversarial)
+###  2. The Judicial Layer (Adversarial)
 * **Prosecutor Agent**: Actively searches for non-compliance, technical debt, and rubric violations.
 * **Defense Agent**: Contextualizes engineering decisions, identifying valid implementation patterns and workarounds.
 * **Tech Lead Agent**: Evaluates the system for architectural maturity and best practices.
 
-### 🏛️ 3. Synthesis Engine (Consensus)
+###  3. Synthesis Engine (Consensus)
 * **Weighted Multi-Agent Consensus**: A final **Chief Justice** node performs a weighted synthesis of all judicial opinions, producing a deterministic score and an explainable verdict.
 
-## 🚀 Setup & Installation
+## Setup & Installation
 
 Follow these steps to initialize the forensic environment:
 
@@ -90,7 +90,7 @@ Follow these steps to initialize the forensic environment:
     * **GITHUB_TOKEN**: For authenticated repository access.
     * **LANGCHAIN_API_KEY**: For LangSmith forensic tracing.
 
-## ⚖️ Execution
+##  Execution
 
 To run a full forensic audit against a target repository and a PDF rubric, execute the following command:
 
