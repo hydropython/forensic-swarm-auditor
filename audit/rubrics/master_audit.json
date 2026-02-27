@@ -1,0 +1,30 @@
+{
+  "rubric_metadata": { "name": "Protocol B: Final Forensic Standard", "threshold": 3.0 },
+  "dimensions": [
+    {
+      "id": "R1",
+      "target_artifact": "github_repo",
+      "agent": "RepoInvestigator",
+      "instruction": "Verify Pydantic state and operator.ior/add reducers.",
+      "statute": "Tech Lead: Penalty for Dict Soups (Score 3)."
+    },
+    {
+      "id": "D1",
+      "target_artifact": "pdf_report",
+      "agent": "DocAnalyst",
+      "instruction": "Cross-reference paths mentioned in PDF vs actual Repo files.",
+      "statute": "Prosecutor: Charge 'Hallucination Liability' if paths are missing."
+    },
+    {
+      "id": "V1",
+      "target_artifact": "pdf_images",
+      "agent": "VisionInspector",
+      "instruction": "Analyze diagram for Parallel Fan-Out of Judges.",
+      "statute": "Prosecutor: Charge 'Orchestration Fraud' if flow is linear."
+    }
+  ],
+  "synthesis_rules": {
+    "security_override": "os.system without sanitization caps score at 3.",
+    "fact_supremacy": "Defense claims of 'Metacognition' are overruled if DocAnalyst flags Hallucination."
+  }
+}

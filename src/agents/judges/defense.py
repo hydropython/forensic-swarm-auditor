@@ -3,49 +3,35 @@ from src.core.state import AgentState, JudicialOpinion
 
 def defense_node(state: AgentState):
     """
-    ⚖️ The Defense Attorney: Focuses on effort, progress, and 
-    mitigating circumstances for the developer.
+    🛡️ Statute of Effort: Justifies technical debt and highlights underlying sophistication.
     """
-    print("⚖️ Defense: Building the case for the developers...")
-    
-    # 1. Initialize LLM
-    llm = ChatOpenAI(model="gpt-4o", temperature=0.7) 
+    llm = ChatOpenAI(model="gpt-4o", temperature=0.2)
     structured_llm = llm.with_structured_output(JudicialOpinion)
 
-    # 2. DATA SHIELD: Handle Dict or Pydantic Object
     refined_evidences = state.get("refined_evidences", [])
-    evidence_list = []
+    evidence_text = "\n".join([
+        f"- {e.goal if not isinstance(e, dict) else e.get('goal')}: "
+        f"{e.rationale if not isinstance(e, dict) else e.get('rationale')}"
+        for e in refined_evidences
+    ])
 
-    for e in refined_evidences:
-        if isinstance(e, dict):
-            goal = e.get("goal", "Unknown")
-            rationale = e.get("rationale", "N/A")
-            found = e.get("found", False)
-        else:
-            goal = getattr(e, "goal", "Unknown")
-            rationale = getattr(e, "rationale", "N/A")
-            found = getattr(e, "found", False)
-        
-        status = "Implemented" if found else "In-Progress/Missing"
-        evidence_list.append(f"- {goal}: {status} | Context: {rationale}")
-    
-    evidence_text = "\n".join(evidence_list)
-
-    # 3. Judicial Defense Prompt
     prompt = f"""
-    SYSTEM: You are the DEFENSE ATTORNEY. Your job is to find the "Silver Lining" in the code.
-    Highlight where the developer showed intent or partial progress. 
-    Explain why technical debt might be justified for rapid prototyping.
+    ROLE: Defense Counsel.
+    STATUTE: Protocol B-3 (Mitigating Circumstances).
     
     FORENSIC EVIDENCE:
     {evidence_text}
-    
-    TASK: Provide a score (1-5) and your argument defending the architectural choices.
-    1 is "Negligent", 5 is "Exceptional Effort".
+
+    MITIGATION GUIDELINES:
+    1. DEEP COMPREHENSION: If sophisticated AST parsing logic is detected (even if framework execution failed), boost 'Forensic Accuracy' to 3.
+    2. DIALECTICAL TENSION: If distinct agent personas are successful, provide partial credit (Score 3 or 4) for 'Judicial Nuance'.
+    3. RAPID PROTOTYPING: Argue for technical debt as a strategic choice for velocity.
+
+    TASK: Defend architectural choices and request score adjustments based on intent.
+    FORMAT: [MITIGATION]: Justification. [REQUEST]: Score adjustment.
+    CONSTRAINT: Professional and pragmatic advocacy. Max 3 sentences.
     """
-    
-    # 4. Invoke and Return
+
     opinion = structured_llm.invoke(prompt)
-    opinion.judge = "Defense" # Ensure consistency for the Chief Justice
-    
+    opinion.judge = "Defense"
     return {"opinions": [opinion]}
