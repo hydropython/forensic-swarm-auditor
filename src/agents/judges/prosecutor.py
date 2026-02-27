@@ -1,71 +1,37 @@
 from langchain_openai import ChatOpenAI
-from src.core.state import AgentState, JudicialOpinion, Evidence
+from src.core.state import AgentState, JudicialOpinion
 
 def prosecutor_node(state: AgentState):
     """
-    ⚖️ Statute of Orchestration (Prosecutor's Handbook)
-    Charges: Orchestration Fraud, Hallucination Liability.
+    ⚖️ Statute of Orchestration: Penalizes linear flows and documentation-code gaps.
     """
-    # 1. Initialize LLM
     llm = ChatOpenAI(model="gpt-4o", temperature=0)
     structured_llm = llm.with_structured_output(JudicialOpinion)
 
-    # 2. Robust Evidence Extraction (Handles Dict or Pydantic Object)
     refined_evidences = state.get("refined_evidences", [])
-    evidence_list = []
+    evidence_text = "\n".join([
+        f"- {e.goal if not isinstance(e, dict) else e.get('goal')}: "
+        f"{'FOUND' if (e.found if not isinstance(e, dict) else e.get('found')) else 'MISSING'}"
+        for e in refined_evidences
+    ])
 
-    for e in refined_evidences:
-        # Check if it's a dictionary or a Pydantic object
-        if isinstance(e, dict):
-            goal = e.get("goal", "Unknown")
-            found = e.get("found", False)
-            rationale = e.get("rationale", "No rationale provided")
-            location = e.get("location", "Unknown location")
-        else:
-            goal = getattr(e, "goal", "Unknown")
-            found = getattr(e, "found", False)
-            rationale = getattr(e, "rationale", "No rationale provided")
-            location = getattr(e, "location", "Unknown location")
-        
-        status = "✅ FOUND" if found else "❌ MISSING"
-        evidence_list.append(f"- [{status}] GOAL: {goal} | LOC: {location} | RATIONALE: {rationale}")
-
-    evidence_text = "\n".join(evidence_list)
+    prompt = f"""
+    ROLE: Lead Prosecutor.
+    STATUTE: Protocol B-1 (Orchestration & Hallucination).
     
-    # Handle metadata (also checking if it's a dict or object)
-    metadata = state.get('metadata')
-    if isinstance(metadata, dict):
-        git_log = metadata.get("git_log", [])
-    else:
-        git_log = getattr(metadata, "git_log", [])
-    
-    git_context = "\n".join(git_log[-10:]) if git_log else "No Git history found."
-
-    # 3. Judicial Instructions
-    system_prompt = f"""
-    SYSTEM: You are the PROSECUTOR in a forensic code audit. Your goal is to identify "Orchestration Fraud" and technical gaps.
-    
-    CRIMINAL STATUTES:
-    1. Orchestration Fraud: Claiming a multi-agent system when the code is actually linear.
-    2. Hallucination Liability: Claiming features in documentation that do not exist in code.
-    3. Structural Negligence: Missing core files (pyproject.toml, .env.example).
-
-    FORENSIC EVIDENCE PROVIDED BY DETECTIVES:
+    FORENSIC EVIDENCE:
     {evidence_text}
-    
-    RECENT GIT HISTORY:
-    {git_context}
-    
-    TASK: Analyze the evidence objectively. If a requirement is missing, you MUST penalize. 
-    Provide a score (1-5) where 1 is "Major Violation" and 5 is "Compliant".
-    You must cite specific evidence (the 'GOAL' text) in your cited_evidence list.
+
+    SENTENCING PRECEDENTS:
+    1. ORCHESTRATION FRAUD: If 'Graph Orchestration' (Phase 1) is MISSING or the flow is linear, Max Score = 1.
+    2. HALLUCINATION LIABILITY: If 'Structured Output' (Phase 3) is MISSING, Max Score = 2.
+    3. STRUCTURAL NEGLIGENCE: Penalize if core files or state definitions are absent.
+
+    TASK: Issue formal charges based on evidence. 
+    FORMAT: [CHARGE]: Reason. [PENALTY]: Specific score reduction.
+    CONSTRAINT: Professional brevity only. No fluff. Max 3 sentences.
     """
 
-    # 4. Invoke LLM
-    print("⚖️ Prosecutor: Examining evidence for violations...")
-    opinion = structured_llm.invoke(system_prompt)
-    
-    # 5. Final validation of the structured output
+    opinion = structured_llm.invoke(prompt)
     opinion.judge = "Prosecutor"
-    
     return {"opinions": [opinion]}

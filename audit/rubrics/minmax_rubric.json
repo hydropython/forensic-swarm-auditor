@@ -1,0 +1,70 @@
+{
+  "rubric_metadata": {
+    "name": "Week 2: MinMax Governance Audit",
+    "total_points": 100,
+    "passing_threshold": 70
+  },
+  "dimensions": [
+    {
+      "id": "DEV_PROGRESS",
+      "name": "Development Progress",
+      "weight": 35,
+      "target_artifact": "github_repo",
+      "tiers": {
+        "Complete": 35,
+        "Partial": 21,
+        "Superficial": 7,
+        "Absent": 0
+      },
+      "forensic_instruction": "Run 'git log'. Check for >10 commits and narrative progression. Use AST to verify: 1. State reducers (operator.add), 2. Parallel fan-out in engine.py, 3. Hardcoded rules in chief_justice.py. Flag 'bulk upload' if timestamps are clustered.",
+      "statute": "Prosecutor: Charge 'Orchestration Fraud' and cap at 7pts if flow is linear or commits are monolithic."
+    },
+    {
+      "id": "FEEDBACK_LOOP",
+      "name": "Feedback Implementation",
+      "weight": 20,
+      "target_artifact": "github_repo_and_audit_folder",
+      "tiers": {
+        "Fully Integrated": 20,
+        "Selective": 12,
+        "Ignored": 4,
+        "No Exchange": 0
+      },
+      "forensic_instruction": "Locate 'audit/report_bypeer_received/'. Cross-reference identified gaps in that report with subsequent git commit messages. Verify if structural changes (not just cosmetic) were made after the feedback date.",
+      "statute": "Defense: Argue for 20pts if commits show comprehension and traceable fixes of peer-flagged issues."
+    },
+    {
+      "id": "PROACTIVE_COMM",
+      "name": "Proactive Communication",
+      "weight": 20,
+      "target_artifact": "pdf_report",
+      "tiers": {
+        "Collaborative Driver": 20,
+        "Engaged": 12,
+        "Reactive Only": 4,
+        "Absent": 0
+      },
+      "forensic_instruction": "Scan PDF report for mentions of: 'Blockers', 'Design Decisions', 'Coordination', and 'Feedback Engagement'. Look for evidence of a bidirectional loop rather than a one-time handoff.",
+      "statute": "Tech Lead: Score 20 only if the report demonstrates architectural trade-offs discussed during development."
+    },
+    {
+      "id": "AGENT_RELEVANCE",
+      "name": "Agent Feedback Relevance",
+      "weight": 25,
+      "target_artifact": "generated_reports",
+      "tiers": {
+        "Full Forensic Audit": 25,
+        "Targeted Analysis": 15,
+        "Generic Noise": 5,
+        "No Output": 0
+      },
+      "forensic_instruction": "Evaluate the output in 'audit/report_onpeer_generated/'. Does it follow AuditReport Pydantic spec? Does it contain AST-based code verification and multi-perspective judge opinions with citations?",
+      "statute": "Chief Justice: deterministic check. If report is missing or contains hallucinated paths, score 0-5."
+    }
+  ],
+  "synthesis_rules": {
+    "security_cap": 30,
+    "hallucination_penalty": -10,
+    "logic_over_vibe": "Technical Lead carries 40% weight on DEV_PROGRESS; Defense carries 40% on FEEDBACK_LOOP."
+  }
+}
