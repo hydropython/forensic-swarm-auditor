@@ -50,17 +50,20 @@ class DocAnalystEngine:
         return depth_evidence
 
     def extract_file_paths(self) -> list:
-        path_pattern = r"([a-zA-Z0-9_\-\./]+\.(?:py|json|yaml|md|docx|pdf))"
-        paths = list(set(re.findall(path_pattern, self._markdown_content)))
-        # Filter for actual code structure paths
-        paths = [p for p in paths if '/' in p or p.endswith('.py')]
+        # 🚀 More aggressive regex to catch paths like src.core.state or just filenames
+        path_pattern = r"([a-zA-Z0-9_\-\./]+\.(?:py|toml|md|json))|([a-zA-Z0-9_\-]+\/[a-zA-Z0-9_\-\.]+)"
+        raw_matches = re.findall(path_pattern, self._markdown_content)
         
+        # Flatten and clean the results
+        paths = list(set([match[0] or match[1] for match in raw_matches]))
+        paths = [p for p in paths if p and ('.py' in p or '/' in p or 'src' in p)]
+
         return [Evidence(
             goal="Host Analysis Accuracy (Path Extraction)",
             found=len(paths) > 0,
             location=str(self.pdf_path.name),
-            rationale=f"Extracted {len(paths)} unique file paths for cross-verification." if paths else "No paths detected.",
-            content=f"Detected: {', '.join(paths[:5])}" if paths else None
+            rationale=f"Extracted {len(paths)} paths: {', '.join(paths[:3])}" if paths else "No paths found.",
+            content=str(paths)
         )]
 
 def doc_analyst(state: ForensicState): 
