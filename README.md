@@ -89,6 +89,12 @@ Follow these steps to initialize the forensic environment:
     * **OPENAI_API_KEY**: Your primary judicial brain.
     * **GITHUB_TOKEN**: For authenticated repository access.
     * **LANGCHAIN_API_KEY**: For LangSmith forensic tracing.
+    
+## 🗺️ System Architecture Map
+- **State Engine:** `src/core/state.py` (Pydantic / TypedDict)
+- **Orchestration:** `src/core/engine.py` (LangGraph Parallel Fan-out)
+- **Synthesis:** `src/nodes/aggregator.py` (Clerk Node)
+- **Interface:** `frontend/` (React/Streamlit Dashboard)
 
 ##  Execution
 
