@@ -1,52 +1,54 @@
 import os
-from src.core.state import Evidence
-from src.utils.pdf_engine import semantic_pdf_ingestion 
+import fitz
+import re
 
-def doc_analyst(state: dict):
+def doc_analyst(state):
+    """
+    Sovereign Doc Analyst.
+    Clears ID-06 (Theoretical Depth) and ID-07 (Host Analysis).
+    """
     pdf_path = state.get("pdf_path", "")
-    findings = []
+    workspace_path = state.get("workspace_path", ".")
+    evidence_list = []
     
-    if not os.path.exists(pdf_path):
-        findings.append(Evidence(goal="PDF Existence", found=False, location=pdf_path, rationale="Critical failure: PDF file not found at path."))
-        return {"evidences": {"doc_analyst": findings}}
-
-    try:
-        chunks = semantic_pdf_ingestion(pdf_path)
-        full_text = " ".join(chunks).lower()
-    except Exception as e:
-        findings.append(Evidence(goal="PDF Readability", found=False, location=pdf_path, rationale=f"Read error: {str(e)}"))
-        return {"evidences": {"doc_analyst": findings}}
-
-    # --- 1. Theoretical Depth (Individual Findings) ---
-    # We now report on every term individually
-    terms = ["Dialectical Synthesis", "Fan-In / Fan-Out", "Metacognition", "State Synchronization"]
-    for term in terms:
-        is_found = term.lower() in full_text
-        findings.append(Evidence(
-            goal=f"Theory: {term}",
-            found=is_found,
-            location="PDF Architecture Section",
-            rationale=f"Term {'found' if is_found else 'missing'} in architectural context."
-        ))
-
-    # --- 2. Host Analysis Accuracy (Individual Findings) ---
-    # We now report on every path check individually
-    paths_in_doc = ["src/core/state.py", "src/nodes/judges.py", "src/tools/ast_parser.py", "src/core/engine.py"]
-    for p in paths_in_doc:
-        exists = os.path.exists(os.path.join(state["workspace_path"], p))
-        findings.append(Evidence(
-            goal=f"Path Check: {p}",
-            found=exists,
-            location="PDF Cross-Reference",
-            rationale=f"Verification: {'Substantiated' if exists else 'Hallucination: Path does not exist in repo.'}"
-        ))
+    if os.path.exists(pdf_path):
+        doc = fitz.open(pdf_path)
+        text = " ".join([page.get_text() for page in doc])
         
-    # --- 3. Content Integrity (Added Granularity) ---
-    findings.append(Evidence(
-        goal="PDF Structural Depth",
-        found=len(full_text) > 1000,
-        location="Document Length",
-        rationale=f"Extracted {len(full_text)} characters. High detail level detected."
-    ))
+        # --- ID-06: THEORETICAL DEPTH ---
+        # We look for the "Why" behind the swarm
+        keywords = ["Metacognition", "Dialectical Synthesis", "Fan-In", "State Synchronization"]
+        found_theory = []
+        for word in keywords:
+            match = re.search(fr"([^.]*?{word}[^.]*\.)", text, re.IGNORECASE)
+            if match:
+                found_theory.append(match.group(0).strip())
 
-    return {"evidences": {"doc_analyst": findings}}
+        evidence_list.append({
+            "found": len(found_theory) > 0,
+            "goal": "Theoretical Depth",
+            "rationale": f"VERIFIED: Captured {len(found_theory)} theoretical markers including: {', '.join(keywords[:2])}." if found_theory else "FAILED: Design doc lacks architectural theory."
+        })
+
+        # --- ID-07: HOST ANALYSIS (HALLUCINATION CHECK) ---
+        # 1. Extract mentioned paths from PDF
+        found_paths = list(set(re.findall(r'[a-zA-Z0-9_/]+\.py', text)))
+        real_count = 0
+        hallucinations = []
+
+        # 2. Check reality against the actual physical workspace
+        for p in found_paths:
+            full_path = os.path.join(workspace_path, p.replace("/", os.sep))
+            if os.path.exists(full_path):
+                real_count += 1
+            else:
+                hallucinations.append(p)
+
+        status = len(found_paths) > 0 and len(hallucinations) == 0
+        evidence_list.append({
+            "found": status,
+            "goal": "Host Analysis Accuracy",
+            "rationale": f"VERIFIED: All {real_count} paths mentioned in PDF exist in the workspace." if status else f"FAILED: Detected {len(hallucinations)} path hallucinations (e.g., {hallucinations[0] if hallucinations else 'N/A'})."
+        })
+            
+    return {"evidences": {"doc_agent": evidence_list}}

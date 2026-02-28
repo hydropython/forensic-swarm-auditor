@@ -1,16 +1,16 @@
 import os
 import ast
-import os
 import subprocess
 import tempfile
-import ast
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
+from langchain_core.tools import tool
 
+@tool
 def clone_repo_sandboxed(repo_url: str) -> str:
     """
     Protocol A: Secure Environment Isolation.
-    Clones the target repo into a temporary directory that 
-    auto-deletes after the audit to prevent local pollution.
+    Clones the target repo into a temporary directory to prevent local pollution.
+    Returns the local path to the cloned repository.
     """
     temp_dir = tempfile.mkdtemp()
     try:
@@ -20,13 +20,14 @@ def clone_repo_sandboxed(repo_url: str) -> str:
         )
         return temp_dir
     except subprocess.CalledProcessError as e:
-        print(f"Forensic Failure: Git Clone Error: {e.stderr}")
-        raise
+        return f"Forensic Failure: Git Clone Error: {e.stderr}"
 
+@tool
 def get_git_log(repo_path: str) -> List[str]:
     """
     Protocol C: The Git Narrative.
-    Extracts atomic history to verify the engineering process.
+    Extracts commit history to verify if the engineering process followed 
+    the required sequence of development.
     """
     try:
         result = subprocess.run(
@@ -35,14 +36,32 @@ def get_git_log(repo_path: str) -> List[str]:
         )
         return result.stdout.strip().split("\n")
     except Exception:
-        return []
+        return ["Error: Could not retrieve git log."]
 
-def get_ast_tree(file_path: str) -> Optional[ast.AST]:
+@tool
+def analyze_code_structure(file_path: str) -> Dict[str, Any]:
     """
     The Detective's Microscope.
-    Parses Python code into a tree for structural analysis.
+    Uses AST to check for Pydantic models and LangGraph state reducers.
     """
     if not os.path.exists(file_path):
-        return None
-    with open(file_path, "r") as f:
-        return ast.parse(f.read())
+        return {"error": f"File {file_path} not found."}
+    
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            tree = ast.parse(f.read())
+            
+        findings = {
+            "classes": [node.name for node in ast.walk(tree) if isinstance(node, ast.ClassDef)],
+            "imports": [],
+            "has_annotated": False
+        }
+        
+        # Look for 'Annotated' which is the smoking gun for high-quality state management
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Name) and node.id == "Annotated":
+                findings["has_annotated"] = True
+                
+        return findings
+    except Exception as e:
+        return {"error": f"AST Parsing failed: {str(e)}"}

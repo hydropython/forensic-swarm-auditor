@@ -1,36 +1,56 @@
-from langchain_openai import ChatOpenAI
-from src.core.state import AgentState, JudicialOpinion
+from typing import Dict, Any
 
-def tech_lead_node(state: AgentState):
+def tech_lead_node(state: Dict[str, Any]) -> Dict[str, Any]:
     """
-    ⚙️ Statute of Engineering: Evaluates typed rigor and system-level security.
+    The Tech Lead: Enforces Pydantic Rigor and Security Standards.
+    Final Arbitrator: Synthesizes engineering effort with production reality.
     """
-    llm = ChatOpenAI(model="gpt-4o", temperature=0.1)
-    structured_llm = llm.with_structured_output(JudicialOpinion)
-
-    refined_evidences = state.get("refined_evidences", [])
-    evidence_text = "\n".join([
-        f"- {e.goal if not isinstance(e, dict) else e.get('goal')}: "
-        f"{e.rationale if not isinstance(e, dict) else e.get('rationale')}"
-        for e in refined_evidences
-    ])
-
-    prompt = f"""
-    ROLE: CTO / Expert Witness.
-    STATUTE: Protocol B-2 (Engineering Standards).
+    evidences = state.get("evidences", {})
+    opinions = state.get("opinions", [])
     
-    FORENSIC DATA:
-    {evidence_text}
+    # --- FIX: SAFE EVIDENCE EXTRACTION ---
+    raw_repo = evidences.get("repo_agent", [])
+    repo_findings = raw_repo if isinstance(raw_repo, list) else [raw_repo]
+    
+    # --- STATUTE OF ENGINEERING: PRECEDENT 1 (Type Safety) ---
+    uses_dict_soup = any(
+        "dictionary" in str(e.get("rationale", "")).lower() and 
+        "BaseModel" not in str(e.get("rationale", "")) 
+        for e in repo_findings if isinstance(e, dict)
+    )
+    
+    # --- STATUTE OF ENGINEERING: PRECEDENT 2 (Sandboxing) ---
+    is_sandboxed = any(
+        "temp_dir" in str(e.get("rationale", "")) or 
+        "tempfile" in str(e.get("rationale", "")) 
+        for e in repo_findings if isinstance(e, dict)
+    )
+    is_unprotected_clone = any(
+        "os.system" in str(e.get("rationale", "")) and 
+        "git clone" in str(e.get("rationale", "")) 
+        for e in repo_findings if isinstance(e, dict)
+    )
 
-    PRECEDENTS:
-    1. PYDANTIC RIGOR: If 'State Rigor' (Phase 0) uses Dictionaries instead of BaseModel, Ruling: 'Technical Debt', Score = 3.
-    2. SANDBOXED TOOLING: If 'Safe Tooling' (Phase 2) lacks TemporaryDirectory usage, Ruling: 'Security Negligence', Override Score = 1.
+    # --- THE PRAGMATIC SYNTHESIS ---
+    score = 5.0
+    rulings = []
 
-    TASK: Provide technical engineering verdict.
-    FORMAT: [RULING]: Analysis. [STATUS]: Maintainability report.
-    CONSTRAINT: Dry, technical language. Max 3 sentences.
-    """
+    if uses_dict_soup:
+        score = 3.2
+        rulings.append("RULING: Architectural Fragility. The system relies on 'Dict Soups'.")
 
-    opinion = structured_llm.invoke(prompt)
-    opinion.judge = "TechLead"
-    return {"opinions": [opinion]}
+    if is_unprotected_clone or not is_sandboxed:
+        score = 1.0  
+        rulings.append("RULING: Security Negligence. Tooling lacks ephemeral sandboxing.")
+
+    argument = " ".join(rulings) if rulings else "Engineering hygiene is exceptional."
+
+    tech_lead_opinion = {
+        "judge": "TechLead",
+        "score": score,
+        "commentary": argument,
+        "statute": "Statute of Engineering v2.0"
+    }
+
+    # Use the existing opinions list and return the updated dictionary
+    return {"opinions": [tech_lead_opinion]}

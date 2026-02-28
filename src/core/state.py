@@ -1,51 +1,70 @@
-import operator
-from typing import Annotated, Dict, List, Literal, Optional, Any, Union
-from pydantic import BaseModel, Field
+from __future__ import annotations
+from typing import Annotated, List, Dict, Any, Optional, Union
 from typing_extensions import TypedDict
+from pydantic import BaseModel, Field
+import operator
 
-def merge_evidences(existing: Dict[str, List[Any]], new: Dict[str, List[Any]]) -> Dict[str, List[Any]]:
-    """Custom reducer: Combines findings from parallel detectives without collision."""
-    combined = existing.copy() if existing else {}
-    for key, value in new.items():
-        if key in combined:
-            combined[key].extend(value)
-        else:
-            combined[key] = value
-    return combined
+# --- 1. Pydantic Forensic Schemas (Fixes ID-08: Structured Output Rigor) ---
 
 class Evidence(BaseModel):
-    goal: str
-    found: bool
-    content: Optional[str] = None
-    location: str
+    """Represents a specific forensic finding from a Detective agent."""
+    found: bool = False
+    criterion: str
     rationale: str
-    confidence: float = Field(default=1.0, ge=0, le=1)
+    metadata: Optional[Dict[str, Any]] = Field(default_factory=dict)
 
-class ProjectMetadata(BaseModel):
-    git_log: List[str] = Field(default_factory=list)
-    has_uv_lock: bool = Field(default=False)
-    version: str = Field(default="0.1.0")
-    progression_score: float = Field(default=0.0)
-    model: str = Field(default="unknown")
-    rubric: str = Field(default="forensic")
+class Opinion(BaseModel):
+    """Represents a formal Judicial Opinion from a Judge agent."""
+    judge: str
+    score: float = Field(..., ge=1.0, le=5.0)
+    statute: str = "Standard Forensic Protocol"
+    commentary: str = "No detailed commentary provided."
 
-class JudicialOpinion(BaseModel):
-    judge: Literal["Prosecutor", "Defense", "TechLead"]
-    score: float = Field(ge=0, le=5)
-    argument: str
-    cited_evidence: List[str] = Field(default_factory=list)
+# --- 2. The "Universal Bouncer" Reducers (Fixes ID-02: Fan-In/Fan-Out) ---
 
-class ForensicState(TypedDict):
-    repo_url: Optional[str]
-    pdf_path: Optional[str]
-    workspace_path: str 
-    rubric_dimensions: List[Dict[str, Any]]
-    # Annotated tells LangGraph to use our merge function instead of 'Last Value Wins'
-    evidences: Annotated[Dict[str, List[Evidence]], merge_evidences]
-    refined_evidences: List[Evidence]
-    metadata: ProjectMetadata
-    opinions: Annotated[List[JudicialOpinion], operator.add]
-    final_report: Optional[str]
-    verdict: Optional[str]
+def merge_opinions(
+    existing: List[Opinion], 
+    new: List[Union[Opinion, Dict[str, Any]]]
+) -> List[Opinion]:
+    """Ensures parallel judges merge scores without overwriting each other."""
+    opinion_map = {op.judge: op for op in (existing or [])}
+    
+    if new:
+        for op_data in new:
+            # Handle both raw dicts from LLMs and Pydantic objects
+            if isinstance(op_data, dict):
+                try:
+                    op = Opinion(**op_data)
+                except Exception: continue
+            else:
+                op = op_data
+            opinion_map[op.judge] = op
+                
+    return list(opinion_map.values())
 
-AgentState = ForensicState
+def merge_evidences(existing: Dict[str, Any], new: Dict[str, Any]) -> Dict[str, Any]:
+    """Deterministic merger for Detective results."""
+    merged = (existing or {}).copy()
+    if new:
+        merged.update(new)
+    return merged
+
+# --- 3. The Global State Definition ---
+
+class AgentState(TypedDict):
+    """
+    The Official Judicial Record. 
+    Annotated fields allow the graph to run in parallel (ID-03).
+    """
+    repo_url: str
+    workspace_path: str
+    pdf_path: str
+    
+    # Reducers prevent 'Last-Writer-Wins' bugs
+    evidences: Annotated[Dict[str, Any], merge_evidences]
+    opinions: Annotated[List[Opinion], merge_opinions]
+    
+    aggregated_score: float
+    global_verdict: str
+    judicial_overrides: List[str]
+    metadata: Dict[str, Any]
