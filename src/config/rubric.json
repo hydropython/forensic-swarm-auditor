@@ -1,0 +1,23 @@
+{
+  "version": "2.0",
+  "criteria": [
+    {
+      "id": "ID-01",
+      "name": "Git Forensic Analysis",
+      "weight": 0.2,
+      "description": "Verification of 22+ iterative commits vs bulk upload."
+    },
+    {
+      "id": "ID-02",
+      "name": "State Management Rigor",
+      "weight": 0.2,
+      "description": "AST scan for Pydantic BaseModel and Annotated reducers."
+    },
+    {
+      "id": "ID-03",
+      "name": "Theoretical Depth",
+      "weight": 0.1,
+      "description": "Verification of architectural theory in design documentation."
+    }
+  ]
+}

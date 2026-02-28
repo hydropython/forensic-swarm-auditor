@@ -1,70 +1,42 @@
 from __future__ import annotations
-from typing import Annotated, List, Dict, Any, Optional, Union
+from typing import Annotated, List, Dict, Any, Union
 from typing_extensions import TypedDict
 from pydantic import BaseModel, Field
 import operator
 
-# --- 1. Pydantic Forensic Schemas (Fixes ID-08: Structured Output Rigor) ---
-
+# --- Protocol A.1: Structured Schemas ---
 class Evidence(BaseModel):
-    """Represents a specific forensic finding from a Detective agent."""
-    found: bool = False
+    """Forensic proof captured by Detectives."""
+    found: bool
     criterion: str
     rationale: str
-    metadata: Optional[Dict[str, Any]] = Field(default_factory=dict)
+    metadata: Dict[str, Any] = {}
 
 class Opinion(BaseModel):
-    """Represents a formal Judicial Opinion from a Judge agent."""
     judge: str
-    score: float = Field(..., ge=1.0, le=5.0)
-    statute: str = "Standard Forensic Protocol"
-    commentary: str = "No detailed commentary provided."
+    criterion: str  
+    score: float
+    argument: str   
+    statute: str
 
-# --- 2. The "Universal Bouncer" Reducers (Fixes ID-02: Fan-In/Fan-Out) ---
-
-def merge_opinions(
-    existing: List[Opinion], 
-    new: List[Union[Opinion, Dict[str, Any]]]
-) -> List[Opinion]:
-    """Ensures parallel judges merge scores without overwriting each other."""
-    opinion_map = {op.judge: op for op in (existing or [])}
-    
-    if new:
-        for op_data in new:
-            # Handle both raw dicts from LLMs and Pydantic objects
-            if isinstance(op_data, dict):
-                try:
-                    op = Opinion(**op_data)
-                except Exception: continue
-            else:
-                op = op_data
-            opinion_map[op.judge] = op
-                
-    return list(opinion_map.values())
-
-def merge_evidences(existing: Dict[str, Any], new: Dict[str, Any]) -> Dict[str, Any]:
-    """Deterministic merger for Detective results."""
+# --- Protocol B.2: State Reducers ---
+def merge_evidences(existing: Dict[str, List[Any]], new: Dict[str, List[Any]]) -> Dict[str, List[Any]]:
+    """Deep merge for parallel detective results."""
     merged = (existing or {}).copy()
-    if new:
-        merged.update(new)
+    for key, val in new.items():
+        if key in merged:
+            merged[key].extend(val)
+        else:
+            merged[key] = val
     return merged
 
-# --- 3. The Global State Definition ---
-
 class AgentState(TypedDict):
-    """
-    The Official Judicial Record. 
-    Annotated fields allow the graph to run in parallel (ID-03).
-    """
+    """The central state of the Forensic Swarm."""
     repo_url: str
     workspace_path: str
     pdf_path: str
-    
-    # Reducers prevent 'Last-Writer-Wins' bugs
-    evidences: Annotated[Dict[str, Any], merge_evidences]
-    opinions: Annotated[List[Opinion], merge_opinions]
-    
+    # Reducers are mandatory for parallel Fan-Out
+    evidences: Annotated[Dict[str, List[Any]], merge_evidences]
+    opinions: Annotated[List[Dict[str, Any]], operator.add]
     aggregated_score: float
     global_verdict: str
-    judicial_overrides: List[str]
-    metadata: Dict[str, Any]

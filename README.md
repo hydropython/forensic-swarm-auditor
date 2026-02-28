@@ -1,15 +1,36 @@
-#  Forensic Swarm Auditor
+# ⚖️ Forensic Swarm Auditor
+
 > **Neuro-Symbolic Multi-Agent Judicial System for High-Integrity Code Auditing**
 
-[![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-blue.svg)](https://www.python.org/)
-[![Managed by uv](https://img.shields.io/badge/managed%20by-uv-arc.svg)](https://github.com/astral-sh/uv)
-[![Orchestrated by LangGraph](https://img.shields.io/badge/orchestrated%20by-LangGraph-orange.svg)](https://langchain-ai.github.io/langgraph/)
-[![Tracing](https://img.shields.io/badge/tracing-LangSmith-green.svg)](https://smith.langchain.com/)
+[![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-blue?logo=python&logoColor=white)](https://www.python.org/)
+[![Managed by uv](https://img.shields.io/badge/managed%20by-uv-E6772C?logo=rust&logoColor=white)](https://github.com/astral-sh/uv)
+[![LangGraph](https://img.shields.io/badge/orchestrated%20by-LangGraph-FF6B6B?logo=langchain&logoColor=white)](https://langchain-ai.github.io/langgraph/)
+[![Tracing](https://img.shields.io/badge/tracing-LangSmith-00A3FF?logo=langchain&logoColor=white)](https://smith.langchain.com/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Docker](https://img.shields.io/badge/docker-ready-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
+[![CI/CD](https://github.com/hydropython/forensic-swarm-auditor/actions/workflows/ci.yml/badge.svg)](https://github.com/hydropython/forensic-swarm-auditor/actions)
 
-## 📖 Overview
-The **Forensic Swarm Auditor** is an advanced autonomous system designed to evaluate software repositories against complex PDF-based rubrics. By integrating **Structural AST Analysis** (Symbolic logic) with an **Adversarial Judicial Layer** (Neuro reasoning), the system provides verifiable, explainable audits that eliminate the subjectivity common in standard LLM code reviews.
+<p align="center">
+  <strong>An autonomous forensic auditing system that combines symbolic AST analysis with adversarial multi-agent reasoning to deliver verifiable, bias-resistant code evaluations.</strong>
+</p>
 
+---
 
+## 🎯 Quick Start
+
+```bash
+# Clone and setup (requires uv)
+git clone https://github.com/hydropython/forensic-swarm-auditor.git
+cd forensic-swarm-auditor
+uv sync
+cp .env.example .env  # Add your API keys
+
+# Run your first forensic audit
+uv run python main.py \
+  --repo "https://github.com/example/target-repo" \
+  --rubric "./docs/evaluation_rubric.pdf" \
+  --output "./audit_report.md"
+```
 ##  Detailed Project Structure
 Following the modular architecture with dedicated infrastructure and core orchestration:
 

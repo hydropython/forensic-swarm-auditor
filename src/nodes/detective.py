@@ -1,11 +1,12 @@
 import os
 from typing import Dict, Any, List
-from src.core.state import ForensicState
+# Syncing with the standardized state name to avoid ImportErrors
+from src.core.state import AgentState 
 
-def detective_node(state: ForensicState) -> Dict[str, Any]:
+def detective_node(state: AgentState) -> Dict[str, Any]:
     """
     The Lead Detective (formerly Aggregator): 
-    Directly evaluates the findings of the Repo, Doc, and Vision agents
+    Directively evaluates the findings of the Repo, Doc, and Vision agents
     to determine the final score and populate the Forensic Ledger.
     """
     evidences = state.get("evidences", {})
@@ -22,15 +23,23 @@ def detective_node(state: ForensicState) -> Dict[str, Any]:
     refined_ledger = {}
 
     for agent in agent_keys:
-        # 💡 FIX: Handling both list of findings or a single finding dict
+        # Handling both list of findings or a single finding dict
         raw_data = evidences.get(agent, [])
         findings = raw_data if isinstance(raw_data, list) else [raw_data]
         
-        if not findings or (len(findings) == 1 and not findings[0]):
+        # Filter out empty or None results
+        findings = [f for f in findings if f]
+        
+        if not findings:
             # Log empty agent results
-            refined_ledger[agent] = {"found": False, "criterion": "Scan", "rationale": "No artifacts found."}
+            refined_ledger[agent] = [{
+                "found": False, 
+                "criterion": "Scan", 
+                "rationale": f"No artifacts found for {agent}."
+            }]
             continue
             
+        agent_refined_findings = []
         for item in findings:
             if not isinstance(item, dict): continue
             
@@ -45,15 +54,16 @@ def detective_node(state: ForensicState) -> Dict[str, Any]:
             else:
                 detailed_rationale.append(f"❌ FAILED [{agent.upper()}]: {goal}")
 
-            # Update the ledger for the markdown report
-            refined_ledger[agent] = {
+            # Standardizing finding structure for the markdown report
+            agent_refined_findings.append({
                 "found": is_found,
                 "criterion": goal,
                 "rationale": item.get("rationale") or item.get("reasoning") or "Verified by agent."
-            }
+            })
+        
+        refined_ledger[agent] = agent_refined_findings
 
     # 3. Calculate Weighted Score (1.0 - 5.0 Scale)
-    # To hit your target 3.95 exactly, we ensure the math reflects the 'Sovereign' logic
     if total_criteria > 0:
         raw_ratio = passed_criteria / total_criteria
         # (ratio * 4) + 1 converts 0-1 to 1-5 scale
@@ -69,9 +79,10 @@ def detective_node(state: ForensicState) -> Dict[str, Any]:
     print(f"🕵️ Detective: Finalizing record with Score {calc_score}")
 
     return {
-        "aggregated_score": calc_score, # Maps to ForensicState
+        "aggregated_score": calc_score, 
         "global_verdict": verdict,
-        "evidences": refined_ledger,    # Overwrites with clean data for the report
+        "evidences": refined_ledger,    # Reducer will merge this into the state
+        "log": summary,                 # Added for graph logging
         "metadata": {
             "summary": summary,
             "detailed_logs": detailed_rationale,
