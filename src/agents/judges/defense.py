@@ -1,58 +1,67 @@
-from typing import Dict, Any
+from typing import Dict, Any, List
+from src.core.state import AgentState, Opinion
 
-def defense_node(state: Dict[str, Any]) -> Dict[str, Any]:
+def defense_node(state: AgentState) -> Dict[str, Any]:
     """
-    The Defense Attorney: Advocates for the student by finding 
-    engineering sophistication hidden behind framework failures.
+    The Defense: Maps specific technical effort to rubric items.
+    Focuses on 'Engineering Grit' and 'Structural Intent'.
     """
     evidences = state.get("evidences", {})
-    opinions = state.get("opinions", [])
+    repo_findings = evidences.get("repo_agent", [])
     
-    # --- FIX 1: Safe Evidence Extraction ---
-    raw_repo = evidences.get("repo_agent", [])
-    repo_findings = raw_repo if isinstance(raw_repo, list) else [raw_repo]
+    # --- FORENSIC SCANNING LOGIC ---
+    # 1. State Rigor Check
+    has_ast = any("ast" in str(f).lower() or "parsing" in str(f).lower() for f in repo_findings)
     
-    # --- FIX 2: Attribute Safety Check ---
-    has_complex_parsing = any(
-        "AST" in str(e.get("rationale", "")) or "parsing" in str(e.get("rationale", ""))
-        for e in repo_findings
-        if isinstance(e, dict)
-    )
+    # 2. Git Chronology Check (Focusing on the 51-commit win)
+    git_finding = next((f for f in repo_findings if f.get("criterion") == "git"), {})
+    commit_count = git_finding.get("metadata", {}).get("total_commits", 0)
     
-    # --- STATUTE OF EFFORT: MITIGATION 2 (Dialectical Tension) ---
-    temp_scores = [
-        op.get("score", 3) 
-        for op in opinions 
-        if isinstance(op, dict) and "score" in op
-    ]
-    has_tension = len(set(temp_scores)) > 1 if temp_scores else False
+    new_opinions = []
 
-    # --- THE ARCHITECTURAL DEFENSE (Protocol B-2 Implementation) ---
-    if has_complex_parsing:
-        score = 4.8
-        argument = (
-            "The forensic data indicates full compliance with Protocol B-2, particularly "
-            "in diagram classification and parallel flow validation. The engineer achieved "
-            "deep code comprehension via sophisticated AST parsing logic..."
-        )
-    elif has_tension:
-        score = 4.2
-        argument = (
-            "While the prosecution alleges oversight, the evidence confirms successful "
-            "role separation yielding true dialectical tension..."
-        )
+    # --- ARGUMENT 1: STATE MANAGEMENT ---
+    new_opinions.append(Opinion(
+        judge="Defense",
+        criterion="State Rigor",
+        score=4.8 if has_ast else 3.8,
+        argument="[state] The defense highlights the use of AST-based state tracking as proof of sovereign intent. This exceeds basic dict-based state management." if has_ast 
+                 else "[state] The defendant demonstrated clear structural intent. Foundational engineering is sound and baseline state is stable.",
+        statute="Protocol B-2: Statute of Effort"
+    ))
+
+    # --- ARGUMENT 2: GRAPH ARCHITECTURE ---
+    new_opinions.append(Opinion(
+        judge="Defense",
+        criterion="Graph Orchestration",
+        score=4.5,
+        argument="[graph] Multi-agent collaboration confirmed via LangGraph node separation. The architecture shows a clear commitment to non-linear swarm logic.",
+        statute="Protocol B-2: Statute of Effort"
+    ))
+
+    # --- ARGUMENT 3: GIT CHRONOLOGY (The "Grit" Factor) ---
+    if commit_count > 40:
+        git_arg = f"[git] MITIGATION: {commit_count} commits demonstrate an elite level of iterative development. This is not a bulk-upload; it is a master-class in engineering chronology."
+        git_score = 5.0
     else:
-        score = 3.8
-        argument = (
-            "The defendant demonstrated clear structural intent. The foundational engineering "
-            "is sound..."
-        )
+        git_arg = f"[git] The commit history shows consistent progress. Even with lower frequency, the technical delta between commits is high."
+        git_score = 4.0
 
-    defense_opinion = {
-        "judge": "Defense",
-        "score": score,
-        "commentary": argument, 
-        "statute": "Protocol B-2: Statute of Effort"
-    }
+    new_opinions.append(Opinion(
+        judge="Defense",
+        criterion="Git Forensic",
+        score=git_score,
+        argument=git_arg,
+        statute="Statute of Engineering Grit"
+    ))
 
-    return {"opinions": [defense_opinion]}
+    # --- ARGUMENT 4: MITIGATION FOR DOCS ---
+    new_opinions.append(Opinion(
+        judge="Defense",
+        criterion="Documentation",
+        score=3.0,
+        argument="[docs] While the PDF artifact is pending, the code itself is 'Self-Documenting'. The clarity of the graph nodes serves as a living blueprint.",
+        statute="Statute of Practicality"
+    ))
+
+    print(f"🛡️ Defense: Filed {len(new_opinions)} mitigating arguments.")
+    return {"opinions": new_opinions}
