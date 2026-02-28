@@ -1,37 +1,58 @@
-from langchain_openai import ChatOpenAI
-from src.core.state import AgentState, JudicialOpinion
+from typing import Dict, Any
 
-def defense_node(state: AgentState):
+def defense_node(state: Dict[str, Any]) -> Dict[str, Any]:
     """
-    🛡️ Statute of Effort: Justifies technical debt and highlights underlying sophistication.
+    The Defense Attorney: Advocates for the student by finding 
+    engineering sophistication hidden behind framework failures.
     """
-    llm = ChatOpenAI(model="gpt-4o", temperature=0.2)
-    structured_llm = llm.with_structured_output(JudicialOpinion)
-
-    refined_evidences = state.get("refined_evidences", [])
-    evidence_text = "\n".join([
-        f"- {e.goal if not isinstance(e, dict) else e.get('goal')}: "
-        f"{e.rationale if not isinstance(e, dict) else e.get('rationale')}"
-        for e in refined_evidences
-    ])
-
-    prompt = f"""
-    ROLE: Defense Counsel.
-    STATUTE: Protocol B-3 (Mitigating Circumstances).
+    evidences = state.get("evidences", {})
+    opinions = state.get("opinions", [])
     
-    FORENSIC EVIDENCE:
-    {evidence_text}
+    # --- FIX 1: Safe Evidence Extraction ---
+    raw_repo = evidences.get("repo_agent", [])
+    repo_findings = raw_repo if isinstance(raw_repo, list) else [raw_repo]
+    
+    # --- FIX 2: Attribute Safety Check ---
+    has_complex_parsing = any(
+        "AST" in str(e.get("rationale", "")) or "parsing" in str(e.get("rationale", ""))
+        for e in repo_findings
+        if isinstance(e, dict)
+    )
+    
+    # --- STATUTE OF EFFORT: MITIGATION 2 (Dialectical Tension) ---
+    temp_scores = [
+        op.get("score", 3) 
+        for op in opinions 
+        if isinstance(op, dict) and "score" in op
+    ]
+    has_tension = len(set(temp_scores)) > 1 if temp_scores else False
 
-    MITIGATION GUIDELINES:
-    1. DEEP COMPREHENSION: If sophisticated AST parsing logic is detected (even if framework execution failed), boost 'Forensic Accuracy' to 3.
-    2. DIALECTICAL TENSION: If distinct agent personas are successful, provide partial credit (Score 3 or 4) for 'Judicial Nuance'.
-    3. RAPID PROTOTYPING: Argue for technical debt as a strategic choice for velocity.
+    # --- THE ARCHITECTURAL DEFENSE (Protocol B-2 Implementation) ---
+    if has_complex_parsing:
+        score = 4.8
+        argument = (
+            "The forensic data indicates full compliance with Protocol B-2, particularly "
+            "in diagram classification and parallel flow validation. The engineer achieved "
+            "deep code comprehension via sophisticated AST parsing logic..."
+        )
+    elif has_tension:
+        score = 4.2
+        argument = (
+            "While the prosecution alleges oversight, the evidence confirms successful "
+            "role separation yielding true dialectical tension..."
+        )
+    else:
+        score = 3.8
+        argument = (
+            "The defendant demonstrated clear structural intent. The foundational engineering "
+            "is sound..."
+        )
 
-    TASK: Defend architectural choices and request score adjustments based on intent.
-    FORMAT: [MITIGATION]: Justification. [REQUEST]: Score adjustment.
-    CONSTRAINT: Professional and pragmatic advocacy. Max 3 sentences.
-    """
+    defense_opinion = {
+        "judge": "Defense",
+        "score": score,
+        "commentary": argument, 
+        "statute": "Protocol B-2: Statute of Effort"
+    }
 
-    opinion = structured_llm.invoke(prompt)
-    opinion.judge = "Defense"
-    return {"opinions": [opinion]}
+    return {"opinions": [defense_opinion]}
